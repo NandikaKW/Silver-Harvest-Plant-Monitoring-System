@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silver Harvest | Plant Monitoring</title>
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/front.css">
+    <style>
+        /* Page Modal Styles */
+        .page-modal {
+            position: fixed;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-modal.open {
+            top: 0;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            margin-left: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0.25rem;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-button:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-content {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #modal-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Overlay for when modal is open */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+    </style>
+
+</head>
+<body>
+<nav>
+    <div class="logo-name">
+        <div class="logo-image">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <span class="logo_name">SILVER HARVEST</span>
+    </div>
+
+    <div class="menu-items">
+        <ul class="nav-links">
+            <li><a href="#">
+                <i class="uil uil-estate"></i>
+                <span class="link-name">Dashboard</span>
+            </a></li>
+            <li><a href="#" data-page="crop.html">
+                <i class="uil uil-trees"></i>
+                <span class="link-name">Crop Monitoring</span>
+            </a></li>
+            <li><a href="#" data-page="Field.html">
+                <i class="uil uil-chart"></i>
+                <span class="link-name">Field Analytics</span>
+            </a></li>
+            <li><a href="#" data-page="equipment.html">
+                <i class="uil uil-wrench"></i>
+                <span class="link-name">Equipment</span>
+            </a></li>
+            <li><a href="#" data-page="staff.html">
+                <i class="uil uil-users-alt"></i>
+                <span class="link-name">Staff</span>
+            </a></li>
+            <li><a href="#" data-page="Monitoring-logs.html">
+                <i class="uil uil-file-alt"></i>
+                <span class="link-name">Monitoring Logs</span>
+            </a></li>
+            <li><a href="#" data-page="vehicle.html">
+                <i class="uil uil-truck"></i>
+                <span class="link-name">Vehicles</span>
+            </a></li>
+        </ul>
+
+        <ul class="logout-mode">
+            <li><a href="index.html">
+                <i class="uil uil-signout"></i>
+                <span class="link-name">Logout</span>
+            </a></li>
+        </ul>
+    </div>
+</nav>
+
+<section class="dashboard">
+    <div class="top">
+        <i class="uil uil-bars sidebar-toggle"></i>
+
+        <div class="search-box">
+            <i class="uil uil-search"></i>
+            <input type="text" placeholder="Search crops, fields...">
+        </div>
+
+        <div class="profile">
+            <img src="images/Plant-logo.png" alt="User">
+            <span class="username">Farm Manager</span>
+        </div>
+    </div>
+
+    <!-- DASH CONTENT WRAPPER -->
+    <div class="dash-content" id="main-dashboard">
+
+        <!-- Default Overview Section -->
+        <!-- Header -->
+        <div class="dashboard-header fade-in">
+            <h1 style="color: black;">
+                <i class="fas fa-tractor"></i> Silver Harvest Dashboard
+            </h1>
+            <div class="header-actions">
+                <a href="crop.html" class="btn-primary" style="color: black;">
+                    <i class="fas fa-seedling"></i> Crop Management
+                </a>
+                <a href="Field.html" class="btn-primary"  style="color: black;">
+                    <i class="fas fa-tractor"></i> Field Management
+                </a>
+                <a href="Monitoring-logs.html" class="btn-primary" style="color: black;">
+                    <i class="fas fa-clipboard-list"></i> Monitoring Logs
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-container fade-in">
+            <div class="stat-card" style="animation-delay: 0.1s;">
+                <div class="stat-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Total Crops</h4>
+                    <p id="totalCrops">24</p>
+                </div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.2s;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--secondary-color), #4daa7f);">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Active Fields</h4>
+                    <p id="activeFields">8</p>
+                </div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.3s;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--accent-color), #f39c12);">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Monitoring Logs</h4>
+                    <p id="totalLogs">42</p>
+                </div>
+            </div>
+            <div class="stat-card" style="animation-delay: 0.4s;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">
+                    <i class="fas fa-cloud-sun"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>Current Season</h4>
+                    <p id="currentSeason">Spring</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Chart Section -->
+            <div class="chart-section fade-in" style="animation-delay: 0.5s;">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-line"></i> Crop Production Overview</h3>
+                    <div class="chart-actions">
+                        <select class="form-select" style="width: auto; display: inline-block; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <option>Last 7 Days</option>
+                            <option selected>Last 30 Days</option>
+                            <option>Last 90 Days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="productionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions fade-in" style="animation-delay: 0.6s;">
+                <div class="actions-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="action-list">
+                    <a href="crop.html" class="action-item">
+                        <div class="action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="action-text">
+                            <h4>Add New Crop</h4>
+                            <p>Register a new crop in the system</p>
+                        </div>
+                    </a>
+                    <a href="Field.html" class="action-item">
+                        <div class="action-icon" style="background: linear-gradient(135deg, var(--secondary-color), #4daa7f);">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div class="action-text">
+                            <h4>Manage Fields</h4>
+                            <p>View and edit field information</p>
+                        </div>
+                    </a>
+                    <a href="Monitoring-logs.html" class="action-item">
+                        <div class="action-icon" style="background: linear-gradient(135deg, var(--accent-color), #f39c12);">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <div class="action-text">
+                            <h4>Create Log Entry</h4>
+                            <p>Record field observations</p>
+                        </div>
+                    </a>
+                    <a href="vehicle.html" class="action-item">
+                        <div class="action-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="action-text">
+                            <h4>Vehicle Details</h4>
+                            <p>Manage vehicle information</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+<!--            <div class="recent-activity fade-in" style="animation-delay: 0.7s;">-->
+<!--                <div class="activity-header">-->
+<!--                    <h3><i class="fas fa-history"></i> Recent Activity</h3>-->
+<!--                    <a href="#" class="btn-secondary">View All</a>-->
+<!--                </div>-->
+<!--                <div class="activity-list">-->
+<!--                    <div class="activity-item">-->
+<!--                        <div class="activity-icon">-->
+<!--                            <i class="fas fa-seedling"></i>-->
+<!--                        </div>-->
+<!--                        <div class="activity-content">-->
+<!--                            <h4>New Crop Added</h4>-->
+<!--                            <p>Corn (Zea mays) was added to Field B-12</p>-->
+<!--                            <div class="activity-time">2 hours ago</div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="activity-item">-->
+<!--                        <div class="activity-icon" style="background: linear-gradient(135deg, var(&#45;&#45;secondary-color), #4daa7f);">-->
+<!--                            <i class="fas fa-tractor"></i>-->
+<!--                        </div>-->
+<!--                        <div class="activity-content">-->
+<!--                            <h4>Field Updated</h4>-->
+<!--                            <p>Field A-05 irrigation system was serviced</p>-->
+<!--                            <div class="activity-time">5 hours ago</div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="activity-item">-->
+<!--                        <div class="activity-icon" style="background: linear-gradient(135deg, var(&#45;&#45;accent-color), #f39c12);">-->
+<!--                            <i class="fas fa-clipboard-list"></i>-->
+<!--                        </div>-->
+<!--                        <div class="activity-content">-->
+<!--                            <h4>Monitoring Log Created</h4>-->
+<!--                            <p>Pest observation recorded in Field C-08</p>-->
+<!--                            <div class="activity-time">Yesterday</div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="activity-item">-->
+<!--                        <div class="activity-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">-->
+<!--                            <i class="fas fa-cloud-sun"></i>-->
+<!--                        </div>-->
+<!--                        <div class="activity-content">-->
+<!--                            <h4>Weather Alert</h4>-->
+<!--                            <p>Rain forecasted for tomorrow - irrigation adjusted</p>-->
+<!--                            <div class="activity-time">2 days ago</div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <!-- System Status -->
+            <div class="system-status fade-in" style="animation-delay: 0.8s;">
+                <div class="status-header">
+                    <h3><i class="fas fa-server"></i> System Status</h3>
+                </div>
+                <div class="status-list">
+                    <div class="status-item">
+                        <div class="status-info">
+                            <div class="status-icon">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <div class="status-text">
+                                <h4>Crop Management</h4>
+                                <p>All systems operational</p>
+                            </div>
+                        </div>
+                        <span class="status-indicator status-online">Online</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-info">
+                            <div class="status-icon" style="background: linear-gradient(135deg, var(--secondary-color), #4daa7f);">
+                                <i class="fas fa-tractor"></i>
+                            </div>
+                            <div class="status-text">
+                                <h4>Field Management</h4>
+                                <p>Processing data</p>
+                            </div>
+                        </div>
+                        <span class="status-indicator status-online">Online</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-info">
+                            <div class="status-icon" style="background: linear-gradient(135deg, var(--accent-color), #f39c12);">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <div class="status-text">
+                                <h4>Monitoring Logs</h4>
+                                <p>Sync in progress</p>
+                            </div>
+                        </div>
+                        <span class="status-indicator status-online">Online</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-info">
+                            <div class="status-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="status-text">
+                                <h4>Weather API</h4>
+                                <p>Updated 15 min ago</p>
+                            </div>
+                        </div>
+                        <span class="status-indicator status-online">Online</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="dashboard-footer fade-in">
+            <p>© 2023 Silver Harvest | Modern Agriculture Solutions</p>
+        </div>
+
+        <!-- Hidden iframe initially -->
+        <iframe id="content-frame" src="" frameborder="0" style="width:100%; height:80vh; display:none;"></iframe>
+    </div>
+</section>
+
+<!-- Add this modal container after the dashboard section -->
+<div id="page-modal" class="page-modal">
+    <div class="modal-header">
+        <button id="close-modal" class="close-button">
+            <i class="uil uil-times"></i>
+        </button>
+        <span class="modal-title"></span>
+    </div>
+    <div class="modal-content">
+        <iframe id="modal-frame" src="" frameborder="0"></iframe>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/front.js"></script>
+
+</body>
+</html>

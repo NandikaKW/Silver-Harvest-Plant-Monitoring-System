@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Silver Harvest | Sign Up</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="form-wrapper">
+    <h2>Sign Up</h2>
+    <form id="signupForm" action="#" autocomplete="off">
+        <div class="form-control">
+            <input type="text" name="firstName" autocomplete="off" required>
+            <label>First Name</label>
+        </div>
+        <div class="form-control">
+            <input type="text" name="lastName" autocomplete="off" required>
+            <label>Last Name</label>
+        </div>
+        <div class="form-control">
+            <input type="email" name="email" autocomplete="off" required>
+            <label>Email</label>
+        </div>
+        <div class="form-control">
+            <input type="password" name="password" autocomplete="new-password" required>
+            <label>Password</label>
+        </div>
+        <div class="form-control">
+            <input type="password" name="confirmPassword" autocomplete="new-password" required>
+            <label>Confirm Password</label>
+        </div>
+        <button type="submit">Sign Up</button>
+    </form>
+
+    <p class="form-footer">Already have an account? <a href="index.html">Sign in now</a></p>
+    <small>
+        This page is protected by Google reCAPTCHA to ensure you're not a bot.
+        <a href="#">Learn more.</a>
+    </small>
+</div>
+<script>
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // Validate passwords match
+        const password = e.target.elements.password.value;
+        const confirmPassword = e.target.elements.confirmPassword.value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        const data = {
+            userId: Date.now().toString(), // simple ID
+            firstName: e.target.elements.firstName.value,
+            lastName: e.target.elements.lastName.value,
+            email: e.target.elements.email.value,
+            password: password,
+            role: "USER"
+        };
+
+        try {
+            const response = await fetch("http://localhost:8080/api/v1/user/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert("Sign up successful!");
+                window.location.href = "index.html"; // redirect to login
+            } else {
+                const error = await response.text();
+                alert("Error signing up: " + error);
+            }
+        } catch (error) {
+            alert("Network error: " + error.message);
+        }
+    });
+</script>
+</body>
+</html>

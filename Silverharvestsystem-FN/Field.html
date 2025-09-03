@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Field Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/field.css">
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-tractor" style="color: rgba(0,0,0,0.73);"></i> Field Management System</h1>
+        <div class="header-actions">
+            <button class="btn-primary" id="openFormBtn">
+                <i class="fas fa-plus-circle"></i> Add New Field
+            </button>
+            <button class="btn-icon" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+            <div class="stat-icon">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Total Fields</h4>
+                <p id="totalFields">0</p>
+            </div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.2s;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                <i class="fas fa-ruler-combined"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Total Area (Acres)</h4>
+                <p id="totalArea">0.00</p>
+            </div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fd79a8, #fab1a0);">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Active Staff</h4>
+                <p id="activeStaff">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card fade-in" style="animation-delay: 0.4s;">
+        <div class="table-header">
+            <h3><i class="fas fa-table"></i> All Fields</h3>
+            <div class="table-actions">
+                <button class="btn-icon" id="filterBtn"><i class="fas fa-filter"></i></button>
+                <input type="text" id="searchInput" placeholder="Search fields..." style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>Field Code</th>
+                    <th>Field Name</th>
+                    <th>Location</th>
+                    <th>Extent (Acres)</th>
+                    <th>Log Code</th>
+                    <th>Images</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="fieldTableBody">
+                <!-- Data will be populated from backend -->
+                </tbody>
+            </table>
+        </div>
+        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container">
+            <div class="pagination-info" id="paginationInfo">
+                Showing 0 of 0 entries
+            </div>
+            <div class="pagination-controls">
+                <button id="firstPageBtn" class="pagination-btn" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button id="prevPageBtn" class="pagination-btn" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button id="nextPageBtn" class="pagination-btn" disabled>
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button id="lastPageBtn" class="pagination-btn" disabled>
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+            <div class="page-size-selector">
+                <label for="pageSizeSelect">Rows per page:</label>
+                <select id="pageSizeSelect">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Section -->
+    <!-- Replace the entire report-section div with this enhanced version -->
+    <div class="report-section fade-in" style="animation-delay: 0.5s;">
+        <div class="report-header">
+            <h3><i class="fas fa-chart-bar"></i> Field Analytics & Reports</h3>
+            <button class="btn-primary" id="generateAllReportsBtn">
+                <i class="fas fa-sync-alt"></i> Refresh All Reports
+            </button>
+        </div>
+
+        <!-- Report Filter Controls -->
+        <div class="report-filters">
+            <div class="filter-group">
+                <label for="reportRange"><i class="fas fa-calendar"></i> Date Range:</label>
+                <select id="reportRange">
+                    <option value="7">Last 7 Days</option>
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="365">Last Year</option>
+                    <option value="all">All Time</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="locationFilter"><i class="fas fa-map-marker-alt"></i> Location:</label>
+                <select id="locationFilter">
+                    <option value="all">All Locations</option>
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Summary Stats Cards -->
+        <div class="summary-stats">
+            <div class="summary-card">
+                <div class="summary-icon" style="background-color: rgba(76, 175, 80, 0.2); color: #4caf50;">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Total Fields</h4>
+                    <span id="summaryTotalFields">0</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon" style="background-color: rgba(103, 58, 183, 0.2); color: #673ab7;">
+                    <i class="fas fa-ruler-combined"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Total Area</h4>
+                    <span id="summaryTotalArea">0</span> Acres
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon" style="background-color: rgba(255, 152, 0, 0.2); color: #ff9800;">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Unique Locations</h4>
+                    <span id="summaryLocations">0</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon" style="background-color: rgba(33, 150, 243, 0.2); color: #2196f3;">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="summary-content">
+                    <h4>Avg. Field Size</h4>
+                    <span id="summaryAvgSize">0</span> Acres
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Tabs -->
+        <div class="report-tabs">
+            <button class="tab-btn active" data-tab="area"><i class="fas fa-ruler-combined"></i> Area Distribution</button>
+            <button class="tab-btn" data-tab="location"><i class="fas fa-map-marker-alt"></i> Location Analysis</button>
+            <button class="tab-btn" data-tab="utilization"><i class="fas fa-tractor"></i> Field Utilization</button>
+            <button class="tab-btn" data-tab="comparison"><i class="fas fa-chart-bar"></i> Field Comparison</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Area Distribution Report -->
+            <div class="tab-pane active" id="areaReport">
+                <div class="report-visualization">
+                    <div class="chart-container">
+                        <canvas id="areaChart" height="250"></canvas>
+                    </div>
+                    <div class="report-insights">
+                        <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                        <ul id="areaInsights">
+                            <li>Analyzing field size distribution...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Analysis Report -->
+            <div class="tab-pane" id="locationReport">
+                <div class="report-visualization">
+                    <div class="chart-container">
+                        <canvas id="locationChart" height="250"></canvas>
+                    </div>
+                    <div class="report-insights">
+                        <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                        <ul id="locationInsights">
+                            <li>Analyzing geographical distribution...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Utilization Report -->
+            <div class="tab-pane" id="utilizationReport">
+                <div class="report-visualization">
+                    <div class="chart-container">
+                        <canvas id="utilizationChart" height="250"></canvas>
+                    </div>
+                    <div class="report-insights">
+                        <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                        <ul id="utilizationInsights">
+                            <li>Analyzing field utilization patterns...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Comparison Report -->
+            <div class="tab-pane" id="comparisonReport">
+                <div class="report-visualization">
+                    <div class="chart-container">
+                        <canvas id="comparisonChart" height="250"></canvas>
+                    </div>
+                    <div class="report-insights">
+                        <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                        <ul id="comparisonInsights">
+                            <li>Preparing field comparisons...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Field Popup -->
+<div id="fieldFormPopup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3><i class="fas fa-tractor"></i> <span id="popupTitle">Add New Field</span></h3>
+            <button id="closePopupBtn" class="btn-icon"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body">
+            <form id="fieldForm" enctype="multipart/form-data">
+                <input type="hidden" id="editMode" value="false">
+                <input type="hidden" id="editFieldCode" name="fieldCode">
+
+                <div class="form-grid">
+                    <!-- Replace the field code input with a generated display -->
+                    <div class="form-group">
+                        <label for="fieldCodeInput"><i class="fas fa-barcode"></i> Field Code</label>
+                        <input type="text" id="fieldCodeInput" name="fieldCode" readonly class="readonly-field">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fieldNameInput"><i class="fas fa-signature"></i> Field Name</label>
+                        <input type="text" id="fieldNameInput" name="fieldName" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="fieldLocationInput"><i class="fas fa-map-marker-alt"></i> Field Location</label>
+                        <input type="text" id="fieldLocationInput" name="fieldLocation" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="extentSizeInput"><i class="fas fa-ruler-combined"></i> Extent Size (Acres)</label>
+                        <input type="number" id="extentSizeInput" name="extent_size" step="0.01" required>
+                    </div>
+
+                    <!-- Replace the log code input with a dropdown -->
+                    <div class="form-group">
+                        <label for="logCodeInput"><i class="fas fa-clipboard-list"></i> Log Code</label>
+                        <select id="logCodeInput" name="logCode" required>
+                            <option value="">Select Log Code</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="fieldImageOneInput"><i class="fas fa-image"></i> Field Image 1</label>
+                        <div class="file-input-container">
+                            <input type="file" id="fieldImageOneInput" name="fieldImageOne" accept="image/*" class="field-image-input">
+                            <label for="fieldImageOneInput" class="file-input-label" id="fileInputLabelOne">
+                                <i class="fas fa-upload"></i> Choose Image 1
+                            </label>
+                            <div class="file-name" id="fileNameOne">No file chosen</div>
+                        </div>
+                        <div class="image-preview-container">
+                            <div class="image-preview" id="imagePreviewOne">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="fieldImageTwoInput"><i class="fas fa-image"></i> Field Image 2</label>
+                        <div class="file-input-container">
+                            <input type="file" id="fieldImageTwoInput" name="fieldImageTwo" accept="image/*" class="field-image-input">
+                            <label for="fieldImageTwoInput" class="file-input-label" id="fileInputLabelTwo">
+                                <i class="fas fa-upload"></i> Choose Image 2
+                            </label>
+                            <div class="file-name" id="fileNameTwo">No file chosen</div>
+                        </div>
+                        <div class="image-preview-container">
+                            <div class="image-preview" id="imagePreviewTwo">
+                                <i class="fas fa-image text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Field
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Field Popup -->
+<div id="viewFieldPopup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3><i class="fas fa-eye"></i> Field Details</h3>
+            <button class="btn-icon close-view-popup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body">
+            <div id="fieldDetails">
+                <!-- Field details will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/field.js"></script>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Log Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="css/monitoring.css">
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-clipboard-list" style="color: #4caf50;"></i> Monitoring Log Management</h1>
+        <div class="header-actions">
+            <button class="btn-primary" id="openFormBtn">
+                <i class="fas fa-plus-circle"></i> Add New Log
+            </button>
+            <button class="btn-icon" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+            <div class="stat-icon">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Total Logs</h4>
+                <p id="totalLogs">--</p>
+            </div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.2s;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Today's Logs</h4>
+                <p id="todayLogs">--</p>
+            </div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fd79a8, #fab1a0);">
+                <i class="fas fa-images"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Logs with Images</h4>
+                <p id="logsWithImages">--</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card fade-in" style="animation-delay: 0.4s;">
+        <div class="table-header">
+            <h3><i class="fas fa-table"></i> All Monitoring Logs</h3>
+            <div class="table-actions">
+                <button class="btn-icon" id="filterBtn"><i class="fas fa-filter"></i></button>
+                <div class="search-container" style="position: relative;">
+                    <input type="text" id="searchInput" placeholder="Search logs..." style="padding: 0.5rem 2.5rem 0.5rem 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; width: 250px;">
+                    <button class="btn-icon" id="searchBtn" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%);">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="dropdown">
+                    <button class="btn-icon" id="reportDropdownBtn"><i class="fas fa-file-alt"></i></button>
+                    <div class="dropdown-menu" id="reportDropdown" style="display: none; position: absolute; background: white; box-shadow: var(--shadow); border-radius: 8px; padding: 0.5rem; z-index: 100; right: 0; margin-top: 0.5rem;">
+                        <button class="dropdown-item" onclick="generateReport('current')" style="width: 100%; text-align: left; padding: 0.5rem 1rem; border: none; background: none; cursor: pointer; border-radius: 4px;"><i class="fas fa-file"></i> Current View Report</button>
+                        <button class="dropdown-item" onclick="generateReport('all')" style="width: 100%; text-align: left; padding: 0.5rem 1rem; border: none; background: none; cursor: pointer; border-radius: 4px;"><i class="fas fa-file-alt"></i> Full Report</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>Log Code</th>
+                    <th>Log Date</th>
+                    <th>Details</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="logsTableBody">
+                <!-- Logs will be populated here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards View -->
+        <div class="log-cards" id="logsCards">
+            <!-- Log cards will be populated here for mobile view -->
+        </div>
+
+        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- Add/Edit Log Popup -->
+<div id="logFormPopup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3><i class="fas fa-clipboard-list"></i> <span id="popupTitle">Add New Log</span></h3>
+            <button id="closePopupBtn" class="btn-icon"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body">
+            <form id="logForm" enctype="multipart/form-data">
+                <input type="hidden" id="logId" value="">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="logCode"><i class="fas fa-barcode"></i> Log Code *</label>
+                        <input type="text" id="logCode" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logDate"><i class="fas fa-calendar-day"></i> Log Date *</label>
+                        <input type="date" id="logDate" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="logDetails"><i class="fas fa-align-left"></i> Log Details *</label>
+                        <textarea id="logDetails" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="observedImage"><i class="fas fa-image"></i> Observed Image *</label>
+                        <div class="file-input-container">
+                            <input type="file" id="observedImage" accept="image/*" required>
+                            <label for="observedImage" class="file-input-label" id="fileInputLabel">
+                                <i class="fas fa-upload"></i> Choose Image
+                            </label>
+                            <div class="file-name" id="fileName">No file chosen</div>
+                        </div>
+                        <img id="imagePreview" src="#" alt="Image Preview">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Log
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Log Details Popup -->
+<div id="logDetailsPopup" class="popup">
+    <div class="popup-content" style="max-width: 800px;">
+        <div class="popup-header">
+            <h3><i class="fas fa-info-circle"></i> Log Details</h3>
+            <button class="btn-icon close-details-popup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body">
+            <div class="log-details-container">
+                <div class="detail-row">
+                    <div class="detail-label">Log Code:</div>
+                    <div class="detail-value" id="detailLogCode"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Log Date:</div>
+                    <div class="detail-value" id="detailLogDate"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Details:</div>
+                    <div class="detail-value" id="detailLogDetails"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Image:</div>
+                    <div class="detail-value">
+                        <img id="detailLogImage" src="" class="img-thumbnail" style="max-width: 100%; max-height: 300px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Viewer Popup -->
+<div id="reportPopup" class="popup">
+    <div class="popup-content" style="max-width: 900px; height: 80vh;">
+        <div class="popup-header">
+            <h3><i class="fas fa-file-pdf"></i> Report Viewer</h3>
+            <button class="btn-icon close-report-popup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body" style="height: calc(100% - 70px); overflow-y: auto;">
+            <div id="reportContent"></div>
+        </div>
+    </div>
+</div>
+
+<script src="js/monitoring-logs.js"></script>
+</body>
+</html>

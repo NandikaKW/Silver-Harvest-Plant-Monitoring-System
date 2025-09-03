@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Crop Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/crop.css">
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-seedling" style="color: #9fcc6b;"></i> Crop Management System</h1>
+        <div class="header-actions">
+            <button class="btn-primary" id="openFormBtn">
+                <i class="fas fa-plus-circle"></i> Add New Crop
+            </button>
+            <button class="btn-icon" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card fade-in" style="animation-delay: 0.1s;">
+            <div class="stat-icon">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Total Crops</h4>
+                <p id="totalCrops">--</p>
+            </div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.2s;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                <i class="fas fa-tractor"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Active Fields</h4>
+                <p id="activeFields">--</p>
+            </div>
+        </div>
+        <div class="stat-card fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fd79a8, #fab1a0);">
+                <i class="fas fa-cloud-sun"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Current Season</h4>
+                <p id="currentSeason">--</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card fade-in" style="animation-delay: 0.4s;">
+        <div class="table-header">
+            <h3><i class="fas fa-table"></i> All Crops</h3>
+            <div class="table-actions">
+                <!--        <button class="btn-icon" id="exportBtn"><i class="fas fa-download"></i></button>-->
+                <!--        <button class="btn-icon" id="printBtn"><i class="fas fa-print"></i></button>-->
+                <button class="btn-icon" id="filterBtn"><i class="fas fa-filter"></i></button>
+                <input type="text" id="searchInput" placeholder="Search crops..." style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 8px;">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th>Crop Code</th>
+                    <th>Common Name</th>
+                    <th>Scientific Name</th>
+                    <th>Category</th>
+                    <th>Season</th>
+                    <th>Field Code</th>
+                    <th>Log Code</th>
+                    <th>Image</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="cropTableBody">
+                <!-- Data will be populated from backend -->
+                </tbody>
+            </table>
+        </div>
+        <!-- Add this right after the table closing tag inside the table-card div -->
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="currentItems">0</span> of <span id="totalItems">0</span> items
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="firstPageBtn">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="pagination-btn" id="prevPageBtn">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <div class="pagination-pages" id="paginationPages">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="pagination-btn" id="nextPageBtn">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="pagination-btn" id="lastPageBtn">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+            <div class="pagination-page-size">
+                <label for="pageSizeSelect">Items per page:</label>
+                <select id="pageSizeSelect">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+        </div>
+        <div id="loadingSpinner" class="spinner" style="display: none;"></div>
+    </div>
+
+    <!-- Report Section -->
+    <div class="report-section fade-in" style="animation-delay: 0.5s;">
+        <div class="report-header">
+            <h3><i class="fas fa-chart-bar"></i> Crop Reports</h3>
+            <button class="btn-primary" id="generateReportBtn">
+                <i class="fas fa-file-export"></i> Generate Full Report
+            </button>
+        </div>
+        <div class="report-grid">
+            <div class="report-card">
+                <h4><i class="fas fa-seedling"></i> Seasonal Distribution</h4>
+                <p>View distribution of crops across different growing seasons. Analyze which seasons are most productive.</p>
+                <button class="btn-secondary" style="margin-top: 1rem;" onclick="generateSeasonReport()">
+                    <i class="fas fa-chart-pie"></i> Generate Report
+                </button>
+            </div>
+            <div class="report-card">
+                <h4><i class="fas fa-tags"></i> Category Analysis</h4>
+                <p>Analyze crops by category (Cereal, Vegetable, Fruit, etc.). Understand your farm's product diversity.</p>
+                <button class="btn-secondary" style="margin-top: 1rem;" onclick="generateCategoryReport()">
+                    <i class="fas fa-chart-bar"></i> Generate Report
+                </button>
+            </div>
+            <div class="report-card">
+                <h4><i class="fas fa-map-marked-alt"></i> Field Performance</h4>
+                <p>Compare productivity across different fields. Identify your most and least productive areas.</p>
+                <button class="btn-secondary" style="margin-top: 1rem;" onclick="generateFieldReport()">
+                    <i class="fas fa-chart-line"></i> Generate Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Crop Popup -->
+<div id="cropFormPopup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3><i class="fas fa-seedling"></i> <span id="popupTitle">Add New Crop</span></h3>
+            <button id="closePopupBtn" class="btn-icon"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body">
+            <form id="cropForm" enctype="multipart/form-data">
+                <input type="hidden" id="editMode" value="false">
+                <input type="hidden" id="editCropCode" name="cropCode">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cropCodeInput"><i class="fas fa-barcode"></i> Crop Code</label>
+                        <div class="input-with-button">
+                            <input type="text" id="cropCodeInput" name="cropCode" required readonly>
+                            <button type="button" id="generateCropCodeBtn" class="btn-icon" title="Generate Crop Code">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commonNameInput"><i class="fas fa-signature"></i> Common Name</label>
+                        <input type="text" id="commonNameInput" name="commonName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scientificNameInput"><i class="fas fa-microscope"></i> Scientific Name</label>
+                        <input type="text" id="scientificNameInput" name="scientificName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoryInput"><i class="fas fa-tag"></i> Category</label>
+                        <select id="categoryInput" name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="Cereal">Cereal</option>
+                            <option value="Vegetable">Vegetable</option>
+                            <option value="Fruit">Fruit</option>
+                            <option value="Legume">Legume</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="seasonInput"><i class="fas fa-cloud-sun"></i> Season</label>
+                        <select id="seasonInput" name="cropSeason" required>
+                            <option value="">Select Season</option>
+                            <option value="Spring">Spring</option>
+                            <option value="Summer">Summer</option>
+                            <option value="Fall">Fall</option>
+                            <option value="Winter">Winter</option>
+                            <option value="All Season">All Season</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fieldCodeInput"><i class="fas fa-tractor"></i> Field Code</label>
+                        <select id="fieldCodeInput" name="fieldCode" required>
+                            <option value="">Select Field Code</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="logCodeInput"><i class="fas fa-clipboard-list"></i> Log Code</label>
+                        <select id="logCodeInput" name="logCode" required>
+                            <option value="">Select Log Code</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="cropImageInput"><i class="fas fa-image"></i> Crop Image</label>
+                        <div class="file-input-container">
+                            <input type="file" id="cropImageInput" name="cropImage" accept="image/*">
+                            <label for="cropImageInput" class="file-input-label" id="fileInputLabel">
+                                <i class="fas fa-upload"></i> Choose Image
+                            </label>
+                            <div class="file-name" id="fileName">No file chosen</div>
+                        </div>
+                        <small class="form-text text-muted" id="imageHelpText">Please select an image for the crop</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancelBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Save Crop
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Crop Popup -->
+<div id="viewCropPopup" class="popup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3><i class="fas fa-eye"></i> Crop Details</h3>
+            <button class="btn-icon close-view-popup"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-body">
+            <div id="cropDetails">
+                <!-- Crop details will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/crop.js"></script>
+
+</body>
+</html>

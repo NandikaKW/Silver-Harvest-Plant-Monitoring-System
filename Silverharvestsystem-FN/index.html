@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Silver Harvest Plantation Monitoring</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Web Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+
+    <!-- Icon Font Stylesheet -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Libraries Stylesheet -->
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <!-- Customized Bootstrap Stylesheet -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Template Stylesheet -->
+    <link href="css/home.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #88B44E;
+            --secondary: #FB9F38;
+            --light: #F5F8F2;
+            --dark: #252C30;
+            --accent: #69a6ce;
+            --text-color: #333;
+            --light-text: #777;
+            --card-bg: #fff;
+            --border-color: #e0e0e0;
+            --positive: #4caf50;
+            --negative: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .cart-badge {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background: rgba(136, 180, 78, 0.1);
+            color: var(--primary);
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        /* Form Styling */
+        .form-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-card h5 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .form-floating label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-floating>.form-control:focus~label,
+        .form-floating>.form-control:not(:placeholder-shown)~label {
+            opacity: 1;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+        /* Cart Items */
+        .cart-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .cart-table thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        .cart-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .cart-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--light);
+        }
+
+        .quantity-input {
+            width: 80px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.375rem 0.75rem;
+        }
+
+        /* Summary */
+        .cart-summary {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-total {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #6a8e3b);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(113, 183, 230, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(113, 183, 230, 0.4);
+        }
+
+        .btn-outline-primary {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background: rgba(105, 166, 206, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5253);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 82, 83, 0.4);
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            background: var(--light);
+            border-radius: 8px;
+        }
+
+        .empty-cart i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+
+        /* Popup Form */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .popup.active .popup-content {
+            transform: translateY(0);
+        }
+
+        .popup-header {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .popup-header h3 {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Form Styles */
+        .checkout-form {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(105, 166, 206, 0.2);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .radio-option input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .radio-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option input:checked ~ .radio-custom {
+            border-color: var(--primary);
+            background-color: var(--primary);
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 1rem 0;
+            border-radius: 0 0 15px 15px;
+        }
+        /* Enhanced Header Styles with Background Image */
+        .page-header-section {
+            margin-bottom: 2.5rem;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header-background {
+            position: relative;
+            color: white;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-background img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(136, 180, 78, 0.85) 0%, rgba(106, 142, 59, 0.9) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            width: 100%;
+            padding: 3rem 2rem;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .badge-icon {
+            background: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: var(--primary);
+        }
+
+        .header-badge span {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .header-title {
+            font-size: 2.75rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        .header-decoration {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .decoration-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .decoration-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .decoration-item i {
+            font-size: 0.9rem;
+        }
+
+        .decoration-item span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        /* Flying item animation - LARGER SIZE */
+        .flying-item {
+            position: fixed;
+            z-index: 9999;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Cart icon in header for animation target */
+        .cart-icon-target {
+            position: fixed;
+            top: 20px;
+            right: 50px;
+            z-index: 10000; /* Increased z-index to ensure it's above everything */
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            Padding-right: 5px;
+            cursor: pointer;
+        }
+
+        .cart-icon-target i {
+            font-size: 20px;
+        }
+
+        /* Cart Badge Styling */
+        #cartBadge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px var(--primary);
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        /* Ensure the cart icon stays on top of everything */
+        .cart-icon-target {
+            z-index: 10000 !important;
+        }
+
+        /* Make sure the flying item has the highest z-index */
+        .flying-item {
+            z-index: 10001 !important;
+        }
+
+        /* Bounce animation for cart icon */
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0, 0, 0);
+            }
+            40%, 43% {
+                transform: translate3d(0, -8px, 0);
+            }
+            70% {
+                transform: translate3d(0, -4px, 0);
+            }
+            90% {
+                transform: translate3d(0, -2px, 0);
+            }
+        }
+
+        .bounce {
+            animation: bounce 1s ease;
+            transform-origin: center bottom;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .header-title {
+                font-size: 2.25rem;
+            }
+
+            .header-decoration {
+                gap: 1rem;
+            }
+
+            .decoration-item {
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-decoration {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .decoration-item {
+                width: fit-content;
+            }
+
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .header-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cart-table thead {
+                display: none;
+            }
+
+            .cart-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+            }
+
+            .cart-table td {
+                display: block;
+                text-align: right;
+                padding: 0.5rem 1rem;
+                position: relative;
+            }
+
+            .cart-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 1rem;
+                top: 50%;
+                transform: translateY(-50%);
+                font-weight: 600;
+                color: var(--dark);
+            }
+
+            .cart-item-image {
+                margin: 0 auto;
+            }
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            /* Tablet devices */
+            .cart-icon-target {
+                top: 70px;
+                right: 15px;
+                width: 55px;
+                height: 55px;
+            }
+
+            .cart-icon-target i {
+                font-size: 22px;
+            }
+
+            #cartBadge {
+                width: 22px;
+                height: 22px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile devices */
+            .cart-icon-target {
+                top: auto;
+                bottom: 20px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .cart-icon-target i {
+                font-size: 20px;
+            }
+
+            #cartBadge {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+        }
+        /* Tablet and below (<= 768px) */
+        @media (max-width: 768px) {
+            .form-card .row .col-md-2:last-child {
+                flex: 0 0 100%;   /* make button full width */
+                max-width: 100%;
+                margin-top: 10px; /* spacing below inputs */
+            }
+        }
+
+        /* Mobile (<= 576px) */
+        @media (max-width: 576px) {
+            .form-card .row .col-md-2:last-child button {
+                font-size: 14px;   /* smaller text */
+                padding: 10px;     /* adjust padding */
+            }
+        }
+        /* Responsive fix for cart table */
+        .cart-table th,
+        .cart-table td {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        /* Mobile/Tablets - stack into cards */
+        @media (max-width: 991px) {
+            .cart-table thead {
+                display: none; /* Hide header row */
+            }
+
+            .cart-table,
+            .cart-table tbody,
+            .cart-table tr,
+            .cart-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .cart-table tr {
+                margin-bottom: 1rem;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                padding: 10px;
+                background: #fff;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            }
+
+            .cart-table td {
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+            }
+
+            /* Auto-generate labels from header text */
+            .cart-table td:nth-of-type(1)::before { content: "Product"; }
+            .cart-table td:nth-of-type(2)::before { content: "Image"; }
+            .cart-table td:nth-of-type(3)::before { content: "Quantity"; }
+            .cart-table td:nth-of-type(4)::before { content: "Price"; }
+            .cart-table td:nth-of-type(5)::before { content: "Actions"; }
+
+            .cart-table td::before {
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                text-align: left;
+                font-weight: 600;
+                color: #555;
+            }
+        }
+
+    </style>
+
+</head>
+<body>
+
+<!-- Add this cart icon target for the animation -->
+<div class="cart-icon-target" id="cartIconTarget">
+    <i class="fas fa-shopping-cart"></i>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartBadge">
+      0
+    </span>
+</div>
+<!-- Spinner Start -->
+<div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+</div>
+<!-- Spinner End -->
+
+
+<!-- Navbar Start -->
+<div class="container-fluid bg-white sticky-top">
+    <div class="container">
+        <nav class="navbar navbar-expand-lg bg-white navbar-light py-2 py-lg-0">
+            <a href="index.html" class="navbar-brand">
+                <img class="img-fluid" src="images/Plant-logo-01.png" alt="Logo">
+            </a>
+            <button type="button" class="navbar-toggler ms-auto me-0" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto">
+                    <a href="#home" class="nav-item nav-link active">Home</a>
+                    <a href="#about" class="nav-item nav-link">About</a>
+                    <a href="#features" class="nav-item nav-link">Features</a>
+                    <a href="#testimonials" class="nav-item nav-link">Testimonials</a>
+                    <a href="#contact" class="nav-item nav-link">Contact</a>
+                    <a href="orders.html" class="nav-item nav-link">My Orders</a>
+                    <a href="SignIn.html" class="nav-item nav-link">Sign In</a>
+                </div>
+                <div class="border-start ps-4 d-none d-lg-block">
+                    <button type="button" class="btn btn-sm p-0"><i class="fa fa-search"></i></button>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<!-- Navbar End -->
+
+
+<!-- Carousel Start -->
+<div class="container-fluid px-0 mb-5" id="home">
+    <div id="header-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <!-- Slide 1 -->
+            <div class="carousel-item active">
+                <img class="w-100" src="images/home-image-01.jpg" alt="Smart Farming">
+                <div class="carousel-caption">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8 text-center">
+                                <p class="fs-4 text-white animated zoomIn">Welcome to <strong class="text-dark">Silver Harvest</strong></p>
+                                <h1 class="display-1 text-dark mb-4 animated zoomIn">Smart Plantation Monitoring System</h1>
+                                <a href="#about" class="btn btn-light rounded-pill py-3 px-5 animated zoomIn">Learn More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-item">
+                <img class="w-100" src="images/home-image-02.webp" alt="Precision Agriculture">
+                <div class="carousel-caption">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8 text-center">
+                                <p class="fs-4 text-white animated zoomIn">Empowering <strong class="text-dark">Farmers</strong></p>
+                                <h1 class="display-1 text-dark mb-4 animated zoomIn">Real-Time Insights for Better Yields</h1>
+                                <a href="#features" class="btn btn-light rounded-pill py-3 px-5 animated zoomIn">Explore Features</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-item">
+                <img class="w-100" src="images/home-image-03.jpg" alt="Sustainable Farming">
+                <div class="carousel-caption">
+                    <div class="container">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8 text-center">
+                                <p class="fs-4 text-white animated zoomIn">Towards <strong class="text-dark">Sustainability</strong></p>
+                                <h1 class="display-1 text-dark mb-4 animated zoomIn">Technology for a Greener Future</h1>
+                                <a href="#contact" class="btn btn-light rounded-pill py-3 px-5 animated zoomIn">Get Started</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carousel Controls -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#header-carousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#header-carousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+
+<!-- Carousel End -->
+
+
+
+<!-- About Start -->
+<div class="container-xxl py-5" id="about">
+    <div class="container">
+        <div class="section-title text-center mb-5">
+            <p class="fs-5 fw-medium fst-italic text-primary">About Silver Harvest PMS</p>
+            <h1 class="display-6">Smart Plantation Monitoring for Sustainable Growth</h1>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                <div class="feature-card bg-white p-4 rounded-3 h-100">
+                    <div class="feature-icon mb-4" style="background: rgba(136, 180, 78, 0.1);">
+                        <i class="fas fa-leaf fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="mb-3">Technology-driven Crop Monitoring</h4>
+                    <p class="mb-0">
+                        Track crops, fields, and growth metrics in real time with our advanced monitoring system for healthier plants and higher yields.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
+                <div class="feature-card bg-white p-4 rounded-3 h-100">
+                    <div class="feature-icon mb-4" style="background: rgba(136, 180, 78, 0.1);">
+                        <i class="fas fa-chart-line fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="mb-3">Data-driven Insights</h4>
+                    <p class="mb-0">
+                        Get actionable analytics and reports to optimize your plantation operations and make informed decisions.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
+                <div class="feature-card bg-white p-4 rounded-3 h-100">
+                    <div class="feature-icon mb-4" style="background: rgba(136, 180, 78, 0.1);">
+                        <i class="fas fa-users fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="mb-3">Team & Equipment Management</h4>
+                    <p class="mb-0">
+                        Efficiently manage staff, vehicles, and equipment with our integrated tracking and scheduling tools.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="row g-4 mt-2">
+            <div class="col-12 wow fadeIn" data-wow-delay="0.7s">
+                <div class="stats-card bg-primary text-white p-4 rounded-3">
+                    <div class="row g-4 text-center">
+                        <div class="col-md-3 col-6">
+                            <h2 class="display-6 mb-0">250+</h2>
+                            <p class="mb-0">Plantations</p>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <h2 class="display-6 mb-0">15K+</h2>
+                            <p class="mb-0">Acres Monitored</p>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <h2 class="display-6 mb-0">98%</h2>
+                            <p class="mb-0">Success Rate</p>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <h2 class="display-6 mb-0">24/7</h2>
+                            <p class="mb-0">Support</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- About End -->
+
+<!-- Article Start -->
+<div class="container-xxl py-5" id="features">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <!-- Image -->
+            <div class="col-lg-5 wow fadeIn" data-wow-delay="0.1s">
+                <div class="article-image-wrapper">
+                    <img class="img-fluid rounded-4" src="images/product-09.jpg" alt="Plantation Monitoring System">
+                    <div class="image-badge">
+                        <i class="fas fa-leaf me-2"></i> Sustainable Farming
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="col-lg-6 wow fadeIn" data-wow-delay="0.3s">
+                <div class="article-content">
+                    <span class="featured-badge mb-3">
+                         <i class="fas fa-star me-1"></i> Featured Article
+                          </span>
+                    <h1 class="display-5 fw-bold mb-4">Smart Plantation Monitoring for the Future of Farming</h1>
+
+                    <div class="article-text">
+                        <p class="mb-4 d-flex">
+                            <span class="text-primary me-2">•</span>
+                            Silver Harvest Plantation Monitoring System revolutionizes plantation management by combining real-time monitoring, crop tracking, and resource management into one integrated platform.
+                        </p>
+                        <p class="mb-4 d-flex">
+                            <span class="text-primary me-2">•</span>
+                            It empowers plantation owners with data-driven insights to improve productivity and sustainability through advanced analytics.
+                        </p>
+                        <p class="mb-4 d-flex">
+                            <span class="text-primary me-2">•</span>
+                            From crop growth cycles to staff, equipment, and field monitoring, the system provides complete transparency and operational efficiency.
+                        </p>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-3 mt-4">
+                        <a href="#" class="btn btn-primary rounded-pill px-4 py-2">
+                            <i class="fas fa-book-open me-2"></i> Learn More
+                        </a>
+                        <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 watch-demo-btn"
+                           data-bs-toggle="modal" data-bs-target="#videoModal"
+                           data-src="https://www.youtube.com/embed/fSAciqEl9X4">
+                            <i class="fas fa-play-circle me-2"></i> Watch Video
+                        </a>
+                    </div>
+
+                    <div class="d-flex align-items-center mt-5 pt-3">
+                        <div class="d-flex me-4">
+                            <div class="me-3">
+                                <h4 class="mb-0 text-primary">250+</h4>
+                                <small>Plantations</small>
+                            </div>
+                            <div class="border-start ps-3">
+                                <h4 class="mb-0 text-primary">98%</h4>
+                                <small>Success Rate</small>
+                            </div>
+                        </div>
+                        <div class="border-start ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-group">
+                                    <img src="images/testimonial-1.jpg" class="avatar" alt="User">
+                                    <img src="images/testimonial-2.jpg" class="avatar" alt="User">
+                                    <img src="images/testimonial-3.jpg" class="avatar" alt="User">
+                                </div>
+                                <div class="ms-3">
+                                    <p class="mb-0 small">Trusted by farmers worldwide</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Article End -->
+
+
+<!-- Video Start -->
+<div class="container-fluid video" style="margin-top: 6rem; margin-bottom: 6rem;">
+    <div class="container">
+        <div class="row g-0">
+            <!-- Text Section -->
+            <div class="col-lg-6 py-5 wow fadeIn" data-wow-delay="0.1s">
+                <div class="py-5">
+                    <h1 class="display-6 mb-4">
+                        Smart Farming for <span class="text-white">Efficiency</span>
+                        and <span class="text-white">Sustainability</span>
+                    </h1>
+                    <h5 class="fw-normal lh-base fst-italic text-white mb-5">
+                        Silver Harvest Plantation Monitoring System empowers modern agriculture
+                        with real-time data, precision crop tracking, and smarter resource management
+                        for healthier yields and sustainable farming.
+                    </h5>
+                    <div class="row g-4 mb-5">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 btn-lg-square bg-white text-primary rounded-circle me-3">
+                                    <i class="fa fa-check"></i>
+                                </div>
+                                <span class="text-dark">Real-time crop monitoring</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 btn-lg-square bg-white text-primary rounded-circle me-3">
+                                    <i class="fa fa-check"></i>
+                                </div>
+                                <span class="text-dark">Field & staff management</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 btn-lg-square bg-white text-primary rounded-circle me-3">
+                                    <i class="fa fa-check"></i>
+                                </div>
+                                <span class="text-dark">Equipment & resource tracking</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 btn-lg-square bg-white text-primary rounded-circle me-3">
+                                    <i class="fa fa-check"></i>
+                                </div>
+                                <span class="text-dark">Sustainable farming insights</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="btn btn-light rounded-pill py-3 px-5" href="#">Explore More</a>
+                </div>
+            </div>
+
+            <!-- Video Section -->
+            <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
+                <div class="h-100 d-flex align-items-center justify-content-center" style="min-height: 300px;">
+                    <button type="button" class="btn-play watch-demo-btn"
+                            data-bs-toggle="modal" data-bs-target="#videoModal"
+                            data-src="https://www.youtube.com/embed/Sx_S-U2sQUI">
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Video End -->
+
+
+
+<!-- Video Modal Start -->
+<div class="modal modal-video fade" id="videoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-0">
+            <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel">Silver Harvest Demo</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 16:9 aspect ratio -->
+                <div class="ratio ratio-16x9">
+                    <iframe class="embed-responsive-item" src="" id="video" allowfullscreen allowscriptaccess="always"
+                            allow="autoplay"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Video Modal End -->
+
+
+<!-- Store Start -->
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header-section">
+        <div class="header-background">
+            <img class="w-100" src="images/home-image-02.webp" alt="Precision Agriculture">
+            <div class="header-overlay"></div>
+            <div class="header-content">
+                <div class="header-badge">
+                    <div class="badge-icon">
+                        <i class="fas fa-shopping-basket"></i>
+                    </div>
+                    <span>My Shopping Cart</span>
+                </div>
+                <h1 class="header-title">Harvest Your Selection</h1>
+                <p class="header-subtitle">Review your freshly picked items and proceed to secure checkout</p>
+                <div class="header-decoration">
+                    <div class="decoration-item">
+                        <i class="fas fa-truck"></i>
+                        <span>Free Shipping</span>
+                    </div>
+                    <div class="decoration-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure Payment</span>
+                    </div>
+                    <div class="decoration-item">
+                        <i class="fas fa-seedling"></i>
+                        <span>Farm Fresh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Cart Form -->
+    <div class="form-card">
+        <h5><i class="fas fa-plus-circle text-primary"></i> Add New Item</h5>
+        <form id="cartForm">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input type="text" id="userId" class="form-control" placeholder="User ID" required>
+                        <label for="userId"><i class="fas fa-user text-primary"></i> User ID</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input type="text" id="cropCode" class="form-control" placeholder="Crop Code" required>
+                        <label for="cropCode"><i class="fas fa-leaf text-primary"></i> Crop Code</label>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-floating">
+                        <input type="number" id="quantity" class="form-control" placeholder="Quantity" min="1" value="1" required>
+                        <label for="quantity"><i class="fas fa-hashtag text-primary"></i> Quantity</label>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 h-100">
+                        <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Cart Items -->
+            <div class="cart-container">
+                <div class="table-responsive">
+                    <table class="table cart-table" id="cartTable">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th class="text-center">Image</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="cartBody">
+                        <!-- Cart items will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+<!--                <a href="#" class="btn btn-outline-primary rounded-pill px-4">-->
+<!--                    <i class="fas fa-arrow-left me-2"></i> Continue Shopping-->
+<!--                </a>-->
+                <button class="btn btn-danger rounded-pill px-4" onclick="clearCart()">
+                    <i class="fas fa-trash me-2"></i> Clear Cart
+                </button>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <!-- Order Summary -->
+            <div class="cart-summary">
+                <h4 class="mb-4 text-primary">Order Summary</h4>
+
+                <div class="summary-item">
+                    <span>Subtotal</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Shipping</span>
+                    <span>$5.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Tax</span>
+                    <span id="tax">$0.00</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Total</span>
+                    <span id="total">$0.00</span>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button class="btn btn-primary rounded-pill py-3" id="checkoutBtn">
+                        <i class="fas fa-check-circle me-2"></i> Proceed to Checkout
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-lock me-1"></i> Your information is safe and secure
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- JavaScript -->
+
+<script>
+    const API_BASE = "http://localhost:8080/api/v1/cart";
+
+    // Handle Add to Cart with animation
+    document.getElementById("cartForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const cartData = {
+            userId: document.getElementById("userId").value,
+            cropCode: document.getElementById("cropCode").value,
+            quantity: parseInt(document.getElementById("quantity").value),
+        };
+
+        // Create flying item animation
+        const addButton = e.target.querySelector('button[type="submit"]');
+        const buttonRect = addButton.getBoundingClientRect();
+
+        // Create flying item - LARGER SIZE
+        const flyingItem = document.createElement('div');
+        flyingItem.className = 'flying-item';
+        flyingItem.innerHTML = '<i class="fas fa-leaf"></i>';
+        flyingItem.style.left = `${buttonRect.left + buttonRect.width/2 - 30}px`; // Center the item
+        flyingItem.style.top = `${buttonRect.top + buttonRect.height/2 - 30}px`; // Center the item
+        document.body.appendChild(flyingItem);
+
+        // Get target position (cart icon in nav)
+        const target = document.getElementById('cartIconTarget');
+        const targetRect = target.getBoundingClientRect();
+
+        // Animate the flying item to the cart icon
+        setTimeout(() => {
+            flyingItem.style.left = `${targetRect.left + targetRect.width/2 - 30}px`;
+            flyingItem.style.top = `${targetRect.top + targetRect.height/2 - 30}px`;
+            flyingItem.style.transform = 'scale(0.7)';
+            flyingItem.style.opacity = '0.8';
+        }, 10);
+
+        try {
+            const res = await fetch(API_BASE, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cartData),
+            });
+
+            if (res.ok) {
+                // Complete animation and remove element
+                setTimeout(() => {
+                    flyingItem.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(flyingItem);
+                    }, 300);
+
+                    // Add bounce effect to cart icon
+                    target.classList.add('bounce');
+                    setTimeout(() => {
+                        target.classList.remove('bounce');
+                    }, 1000);
+
+                    // Update cart badge count
+                    updateCartBadge(cartData.userId);
+
+                    // Load updated cart
+                    loadCart(cartData.userId);
+                }, 800);
+
+                // Reset form
+                document.getElementById("cropCode").value = "";
+                document.getElementById("quantity").value = "1";
+            } else {
+                alert("Error adding to cart");
+                document.body.removeChild(flyingItem);
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            document.body.removeChild(flyingItem);
+        }
+    });
+
+    // Function to update cart badge count
+    async function updateCartBadge(userId) {
+        try {
+            const res = await fetch(`${API_BASE}/user/${userId}`);
+            if (res.ok) {
+                const items = await res.json();
+                document.getElementById('cartBadge').textContent = items.length;
+            }
+        } catch (err) {
+            console.error("Error updating cart badge:", err);
+        }
+    }
+
+    // Update the loadCart function to also update the badge count
+    async function loadCart(userId) {
+        try {
+            const res = await fetch(`${API_BASE}/user/${userId}`);
+            if (!res.ok) throw new Error("Failed to load cart");
+
+            const items = await res.json();
+            const cartBody = document.getElementById("cartBody");
+
+            // Update cart badge
+            document.getElementById('cartBadge').textContent = items.length;
+
+            if (items.length === 0) {
+                cartBody.innerHTML = `
+            <tr>
+              <td colspan="5">
+                <div class="empty-cart">
+                  <i class="fas fa-shopping-cart"></i>
+                  <h4 class="text-muted">Your cart is empty</h4>
+                  <p>Add some products to your cart from our store</p>
+                </div>
+              </td>
+            </tr>
+          `;
+                updateCartSummary(0);
+                return;
+            }
+
+            cartBody.innerHTML = "";
+            let subtotal = 0;
+
+            items.forEach(item => {
+                // Calculate item price (example calculation)
+                const price = 19.99; // This should come from your API
+                const itemTotal = price * item.quantity;
+                subtotal += itemTotal;
+
+                cartBody.innerHTML += `
+            <tr>
+              <td data-label="Product">
+                <div class="d-flex align-items-center">
+                  <div class="ms-3">
+                    <h6 class="mb-0">${item.cropName}</h6>
+                    <small class="text-muted">Code: ${item.cropCode}</small>
+                  </div>
+                </div>
+              </td>
+              <td data-label="Image" class="text-center">
+                ${item.cropImage
+                    ? `<img src="data:image/png;base64,${item.cropImage}" alt="${item.cropName}" class="cart-item-image">`
+                    : '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;"><i class="fas fa-image text-muted"></i></div>'}
+              </td>
+              <td data-label="Quantity" class="text-center">
+                <input type="number" class="quantity-input" value="${item.quantity}" min="1"
+                  onchange="updateCartItem('${item.cartId}', this.value, '${item.userId}')">
+              </td>
+              <td data-label="Price" class="text-center">$${itemTotal.toFixed(2)}</td>
+              <td data-label="Actions" class="text-center">
+                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart('${item.cartId}', '${item.userId}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+            });
+
+            updateCartSummary(subtotal);
+
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Update cart summary
+    function updateCartSummary(subtotal) {
+        const shipping = 5.00;
+        const tax = subtotal * 0.08; // 8% tax
+        const total = subtotal + shipping + tax;
+
+        document.getElementById("subtotal").textContent = `$${subtotal.toFixed(2)}`;
+        document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
+        document.getElementById("total").textContent = `$${total.toFixed(2)}`;
+    }
+
+    // Update Cart Item Quantity
+    async function updateCartItem(cartId, quantity, userId) {
+        try {
+            const res = await fetch(`${API_BASE}/${cartId}?quantity=${quantity}`, {
+                method: "PUT"
+            });
+
+            if (!res.ok) {
+                alert("Error updating item");
+            } else {
+                loadCart(userId);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Remove Item
+    async function removeFromCart(cartId, userId) {
+        if (!confirm("Are you sure you want to remove this item from your cart?")) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/${cartId}`, { method: "DELETE" });
+            if (res.ok) {
+                loadCart(userId);
+            } else {
+                alert("Error removing item");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Clear Cart
+    async function clearCart() {
+        const userId = document.getElementById("userId").value;
+        if (!userId) return alert("Enter User ID first");
+
+        if (!confirm("Are you sure you want to clear your entire cart?")) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/user/${userId}`, { method: "DELETE" });
+            if (res.ok) {
+                document.getElementById("cartBody").innerHTML = `
+            <tr>
+              <td colspan="5">
+                <div class="empty-cart">
+                  <i class="fas fa-shopping-cart"></i>
+                  <h4 class="text-muted">Your cart is empty</h4>
+                  <p>Add some products to your cart from our store</p>
+                </div>
+              </td>
+            </tr>
+          `;
+                updateCartSummary(0);
+            } else {
+                alert("Error clearing cart");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Checkout Popup Functionality
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    const closeCheckoutBtn = document.getElementById("closeCheckoutBtn");
+    const cancelCheckoutBtn = document.getElementById("cancelCheckoutBtn");
+    const checkoutPopup = document.getElementById("checkoutPopup");
+    const checkoutForm = document.getElementById("checkoutForm");
+
+    checkoutBtn.addEventListener("click", () => {
+        const userId = document.getElementById("userId").value;
+        if (!userId) {
+            alert("Please enter your User ID first");
+            return;
+        }
+        // Redirect to order.html with userId as query param (optional)
+        window.location.href = `orders.html?userId=${encodeURIComponent(userId)}`;
+    });
+
+    // closeCheckoutBtn.addEventListener("click", closeCheckout);
+    // cancelCheckoutBtn.addEventListener("click", closeCheckout);
+    //
+    // function closeCheckout() {
+    //     checkoutPopup.classList.remove("active");
+    //     document.body.style.overflow = "auto";
+    // }
+    //
+    // // Close when clicking outside the form
+    // checkoutPopup.addEventListener("click", (e) => {
+    //     if (e.target === checkoutPopup) {
+    //         closeCheckout();
+    //     }
+    // });
+
+    // // Form submission
+    // checkoutForm.addEventListener("submit", (e) => {
+    //     e.preventDefault();
+    //
+    //     // Get form values
+    //     const fullName = document.getElementById("fullName").value;
+    //     const email = document.getElementById("email").value;
+    //     const phone = document.getElementById("phone").value;
+    //     const address = document.getElementById("address").value;
+    //     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    //     const cardNumber = document.getElementById("cardNumber").value;
+    //     const expiryDate = document.getElementById("expiryDate").value;
+    //     const cvv = document.getElementById("cvv").value;
+    //
+    //     // Here you would typically send the data to a server
+    //     console.log({
+    //         fullName,
+    //         email,
+    //         phone,
+    //         address,
+    //         paymentMethod,
+    //         cardNumber,
+    //         expiryDate,
+    //         cvv
+    //     });
+    //
+    //     // Show success message
+    //     alert('Order placed successfully!');
+    //     checkoutForm.reset();
+    //     closeCheckout();
+    //
+    //     // In a real application, you would clear the cart after successful purchase
+    //     // clearCart();
+    // });
+
+    // Auto-load cart when page loads (if userId field has a value)
+    window.onload = () => {
+        const userId = document.getElementById("userId").value;
+        if (userId) {
+            loadCart(userId);
+        }
+    };
+</script>
+<!-- Store End -->
+
+
+<!-- Testimonial Start -->
+<div class="container-fluid testimonial py-5 my-5" id="testimonials">
+    <div class="container py-5">
+        <div class="testimonial-header text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+    <span class="testimonial-label mb-3">
+        <i class="fas fa-quote-left me-2"></i> Client Testimonials
+    </span>
+            <h1 class="testimonial-title mb-4">What Our Users Say <span class="highlight-text">About Silver Harvest</span></h1>
+            <div class="testimonial-divider mx-auto"></div>
+        </div>
+        <div class="owl-carousel testimonial-carousel wow fadeInUp" data-wow-delay="0.5s">
+
+            <!-- Testimonial 1 -->
+            <div class="testimonial-item p-4 p-lg-5">
+                <p class="mb-4">“Silver Harvest has completely transformed the way we monitor our plantation. Real-time insights help us make better decisions and improve yield.”</p>
+                <div class="d-flex align-items-center justify-content-center">
+                    <img class="img-fluid flex-shrink-0 rounded-circle" src="images/testimonial-1.jpg" alt="Farmer Testimonial">
+                    <div class="text-start ms-3">
+                        <h5>Sunil Perera</h5>
+                        <span class="text-primary">Tea Plantation Owner</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 2 -->
+            <div class="testimonial-item p-4 p-lg-5">
+                <p class="mb-4">“The system provides accurate soil and weather data. It’s a game-changer for sustainable agriculture and research.”</p>
+                <div class="d-flex align-items-center justify-content-center">
+                    <img class="img-fluid flex-shrink-0 rounded-circle" src="images/testimonial-2.jpg" alt="Researcher Testimonial">
+                    <div class="text-start ms-3">
+                        <h5>Dr. Anjali Fernando</h5>
+                        <span class="text-primary">Agricultural Scientist</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Testimonial 3 -->
+            <div class="testimonial-item p-4 p-lg-5">
+                <p class="mb-4">“Thanks to Silver Harvest, we reduced costs and optimized fertilizer use. It’s reliable, user-friendly, and very effective.”</p>
+                <div class="d-flex align-items-center justify-content-center">
+                    <img class="img-fluid flex-shrink-0 rounded-circle" src="images/testimonial-3.jpg" alt="Farmer Testimonial">
+                    <div class="text-start ms-3">
+                        <h5>Kamal Wijesinghe</h5>
+                        <span class="text-primary">Agricultural Consultant</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- Testimonial End -->
+
+
+
+<!-- Contact Start -->
+<div class="container-xxl contact py-5" id="contact">
+    <div class="container">
+        <div class="section-title text-center mx-auto wow fadeInUp" data-wow-delay="0.1s" style="max-width: 800px;">
+            <span class="contact-badge mb-3">
+                <i class="fas fa-comment-dots me-2"></i> Get In Touch
+            </span>
+            <h1 class="display-5 fw-bold mb-4">Let's Grow <span class="text-primary">Together</span></h1>
+            <p class="lead text-muted">
+                Ready to transform your plantation management? Our team is here to answer your questions and help you get started with our advanced monitoring solutions.
+            </p>
+        </div>
+
+        <div class="row g-5 mt-4">
+            <!-- Contact Information -->
+            <div class="col-lg-5 wow fadeInUp" data-wow-delay="0.2s">
+                <div class="contact-info-card p-5 rounded-4 h-100">
+                    <h3 class="mb-4 text-primary">Contact Information</h3>
+                    <p class="mb-4">Connect with us through any of the following channels. Our agricultural experts are ready to assist you.</p>
+
+                    <div class="contact-method d-flex align-items-start mb-4">
+                        <div class="contact-icon-wrapper me-4">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                        </div>
+                        <div class="contact-details">
+                            <h5>Our Location</h5>
+                            <p>123 Plantation Road, Kandy, Sri Lanka</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-method d-flex align-items-start mb-4">
+                        <div class="contact-icon-wrapper me-4">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                        </div>
+                        <div class="contact-details">
+                            <h5>Phone Number</h5>
+                            <p>+94 77 123 4567</p>
+                            <p>+94 71 987 6543</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-method d-flex align-items-start mb-4">
+                        <div class="contact-icon-wrapper me-4">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                        </div>
+                        <div class="contact-details">
+                            <h5>Email Address</h5>
+                            <p>info@silverharvest.com</p>
+                            <p>support@silverharvest.com</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-method d-flex align-items-start">
+                        <div class="contact-icon-wrapper me-4">
+                            <div class="contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="contact-details">
+                            <h5>Business Hours</h5>
+                            <p>Mon - Fri: 9:00 AM - 6:00 PM</p>
+                            <p>Sat: 9:00 AM - 1:00 PM</p>
+                        </div>
+                    </div>
+
+                    <div class="social-links mt-5 pt-3">
+                        <h5 class="mb-3">Follow Us</h5>
+                        <div class="d-flex gap-3">
+                            <a href="#" class="social-btn">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="social-btn">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="social-btn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="social-btn">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="social-btn">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="col-lg-7 wow fadeInUp" data-wow-delay="0.4s">
+                <div class="contact-form-card p-5 rounded-4">
+                    <h3 class="mb-4 text-primary">Send Us a Message</h3>
+                    <form id="contactForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" placeholder="Your Name" required>
+                                    <label for="name"><i class="fas fa-user me-2"></i>Your Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" placeholder="Your Email" required>
+                                    <label for="email"><i class="fas fa-envelope me-2"></i>Your Email</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" placeholder="Your Phone">
+                                    <label for="phone"><i class="fas fa-phone me-2"></i>Your Phone</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="subject" placeholder="Subject" required>
+                                    <label for="subject"><i class="fas fa-tag me-2"></i>Subject</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <select class="form-select" id="inquiryType">
+                                        <option selected>General Inquiry</option>
+                                        <option>Technical Support</option>
+                                        <option>Sales Question</option>
+                                        <option>Partnership</option>
+                                        <option>Other</option>
+                                    </select>
+                                    <label for="inquiryType"><i class="fas fa-question-circle me-2"></i>Inquiry Type</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" placeholder="Leave a message here" id="message" style="height: 150px" required></textarea>
+                                    <label for="message"><i class="fas fa-comment-dots me-2"></i>Your Message</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="newsletter">
+                                    <label class="form-check-label" for="newsletter">
+                                        Subscribe to our newsletter for updates on plantation technology
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary py-3 px-5 w-100" type="submit">
+                                    <i class="fas fa-paper-plane me-2"></i> Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Section -->
+        <div class="row mt-5 wow fadeInUp" data-wow-delay="0.6s">
+            <div class="col-12">
+                <div class="map-card rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white p-3">
+                        <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Our Location</h5>
+                    </div>
+                    <div class="map-container" style="height: 400px;">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.258389099966!2d80.63577427499656!3d7.293882492682976!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae366266498acd3%3A0x411a3818a1e03c35!2sKandy!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
+                                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact End -->
+
+
+
+
+<!-- Footer Start -->
+<footer class="footer-section">
+    <div class="container-xxl py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container">
+            <div class="row g-5">
+                <!-- Office Info -->
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-brand mb-4">
+                        <img src="images/Plant-logo.png" alt="Silver Harvest" class="footer-logo mb-3">
+                        <p class="footer-text">Advanced plantation monitoring for sustainable agriculture</p>
+                    </div>
+                    <div class="footer-contact">
+                        <div class="contact-item d-flex mb-3">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <p>123 Plantation Road, Kandy, Sri Lanka</p>
+                        </div>
+                        <div class="contact-item d-flex mb-3">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <p>+94 77 123 4567</p>
+                        </div>
+                        <div class="contact-item d-flex mb-4">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <p>info@silverharvest.com</p>
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="footer-heading mb-4">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i> About Us</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i> Our Technology</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i> Case Studies</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i> Pricing</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i> Contact Us</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right me-2"></i> FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Business Hours -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="footer-heading mb-4">Business Hours</h4>
+                    <div class="business-hours">
+                        <div class="day-time mb-3">
+                            <span class="day">Monday - Friday</span>
+                            <span class="time">09:00 am - 07:00 pm</span>
+                        </div>
+                        <div class="day-time mb-3">
+                            <span class="day">Saturday</span>
+                            <span class="time">09:00 am - 12:00 pm</span>
+                        </div>
+                        <div class="day-time">
+                            <span class="day">Sunday</span>
+                            <span class="time closed">Closed</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="#" class="btn btn-outline-primary rounded-pill">
+                            <i class="fas fa-calendar-alt me-2"></i> Book Appointment
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Newsletter -->
+                <div class="col-lg-3 col-md-6">
+                    <h4 class="footer-heading mb-4">Stay Updated</h4>
+                    <p class="footer-text mb-4">Subscribe to receive the latest updates on plantation monitoring, crop insights, and sustainable farming practices.</p>
+                    <div class="newsletter-form">
+                        <form>
+                            <div class="input-group mb-3">
+                                <input type="email" class="form-control" placeholder="Your Email">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="app-download mt-4">
+                        <p class="small mb-2">Download Our Mobile App</p>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="btn btn-dark btn-sm">
+                                <i class="fab fa-apple me-2"></i> App Store
+                            </a>
+                            <a href="#" class="btn btn-dark btn-sm">
+                                <i class="fab fa-google-play me-2"></i> Play Store
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="copyright-section py-4">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <p class="copyright-text mb-0">&copy; <span id="year"></span> Silver Harvest Plantation Monitoring System. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="footer-legal">
+                        <a href="#" class="me-3">Privacy Policy</a>
+                        <a href="#" class="me-3">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- Footer End -->
+
+
+<!-- Back to Top -->
+<a href="#" class="btn btn-lg btn-primary btn-lg-square rounded-circle back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+<!-- Bootstrap Bundle with Popper (needed for navbar collapse) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- jQuery (needed for your Owl Carousel + custom JS) -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- Other JS Libraries -->
+<script src="lib/wow/wow.min.js"></script>
+<script src="lib/owlcarousel/owl.carousel.min.js"></script>
+
+<!-- Your Custom JS -->
+<script src="js/main.js"></script>
+</body>
+</html>
