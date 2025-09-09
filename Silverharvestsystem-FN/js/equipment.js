@@ -1,3 +1,68 @@
+// JWT Token Management
+let jwtToken = null;
+
+// Function to get the token from localStorage
+function getToken() {
+    if (!jwtToken) {
+        jwtToken = localStorage.getItem('jwtToken');
+    }
+    return jwtToken;
+}
+
+// Function to set the token
+function setToken(token) {
+    jwtToken = token;
+    localStorage.setItem('jwtToken', token);
+}
+
+// Function to remove the token (for logout)
+function removeToken() {
+    jwtToken = null;
+    localStorage.removeItem('jwtToken');
+}
+
+// Function to check if user is authenticated
+function isAuthenticated() {
+    const token = getToken();
+    if (!token) return false;
+
+    // Simple check for token expiration (you might want to use a library for proper validation)
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp > Date.now() / 1000;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Redirect to login if not authenticated
+function checkAuth() {
+    if (!isAuthenticated()) {
+        window.location.href = 'login.html';
+        return false;
+    }
+    return true;
+}
+
+// Modified AJAX setup to include JWT token in headers
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        const token = getToken();
+        if (token) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+        }
+    },
+    error: function(xhr, status, error) {
+        if (xhr.status === 401) {
+            // Unauthorized - token expired or invalid
+            removeToken();
+            window.location.href = 'login.html';
+        } else if (xhr.status === 403) {
+            // Forbidden - user doesn't have permission
+            showError('You do not have permission to perform this action.');
+        }
+    }
+});
 // Add these variables at the top with your other state management variables
 let currentPage = 1;
 let itemsPerPage = 10;
@@ -92,8 +157,9 @@ $(document).ready(function() {
         });
     }
 
-    // Update the loadEquipmentData function to initialize pagination
     function loadEquipmentData() {
+        if (!checkAuth()) return;
+
         showLoading(true);
 
         $.ajax({
@@ -102,7 +168,7 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(data) {
                 equipmentData = data;
-                filteredData = [...equipmentData]; // Initialize filteredData
+                filteredData = [...equipmentData];
                 updateStats(equipmentData);
                 updatePagination();
                 renderEquipmentTable(getCurrentPageData());

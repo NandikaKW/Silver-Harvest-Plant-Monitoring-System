@@ -2,25 +2,74 @@ let currentPage = 1;
 let pageSize = 10;
 let totalPages = 1;
 let filteredFieldsData = [];
+let jwtToken = localStorage.getItem('jwtToken');
 
-    const API_BASE_URL = 'http://localhost:8080/api/v1/field';
-    let fieldsData = [];
-    let currentFieldCode = '';
-    let isEditMode = false;
+const API_BASE_URL = 'http://localhost:8080/api/v1/field';
+let fieldsData = [];
+let currentFieldCode = '';
+let isEditMode = false;
 
-    // Add these variables at the top with other global variables
-    let charts = {
+// Charts object
+let charts = {
     areaChart: null,
     locationChart: null,
     utilizationChart: null,
     comparisonChart: null
 };
 
-    // Initialize when page loads
-    document.addEventListener('DOMContentLoaded', function() {
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is authenticated
+    if (!jwtToken) {
+        // Redirect to login if no token
+        window.location.href = 'login.html';
+        return;
+    }
+
     loadData();
     setupEventListeners();
 });
+
+// Function to make authenticated API calls
+async function makeAuthenticatedRequest(url, options = {}) {
+    if (!jwtToken) {
+        // Try to get token from localStorage
+        jwtToken = localStorage.getItem('jwtToken');
+        if (!jwtToken) {
+            showError('Authentication required. Please login again.');
+            window.location.href = 'login.html';
+            return null;
+        }
+    }
+
+    // Set up default headers
+    const defaultHeaders = {
+        'Authorization': `Bearer ${jwtToken}`,
+        'Content-Type': 'application/json'
+    };
+
+    // Merge headers
+    options.headers = {...defaultHeaders, ...options.headers};
+
+    try {
+        const response = await fetch(url, options);
+
+        // Check for unauthorized response
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('jwtToken');
+            jwtToken = null;
+            showError('Session expired. Please login again.');
+            window.location.href = 'login.html';
+            return null;
+        }
+
+        return response;
+    } catch (error) {
+        console.error('API request failed:', error);
+        showError('Network error. Please check your connection.');
+        return null;
+    }
+}
 
 // Add event listeners for pagination controls
 function setupPaginationListeners() {
@@ -37,8 +86,8 @@ function setupPaginationListeners() {
     });
 }
 
-    // Set up event listeners
-    function setupEventListeners() {
+// Set up event listeners
+function setupEventListeners() {
     setupPaginationListeners();
     // Add field button
     document.getElementById('openFormBtn').addEventListener('click', openAddModal);
@@ -51,11 +100,9 @@ function setupPaginationListeners() {
 
     // Form submission
     document.getElementById('fieldForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    saveField();
-
-
-});
+        e.preventDefault();
+        saveField();
+    });
 
     // Close popup buttons
     document.getElementById('closePopupBtn').addEventListener('click', closeModal);
@@ -64,35 +111,36 @@ function setupPaginationListeners() {
 
     // File input changes
     document.getElementById('fieldImageOneInput').addEventListener('change', function() {
-    previewImage(this, 'imagePreviewOne');
-    updateFileName(this, 'fileNameOne');
-});
+        previewImage(this, 'imagePreviewOne');
+        updateFileName(this, 'fileNameOne');
+    });
 
     document.getElementById('fieldImageTwoInput').addEventListener('change', function() {
-    previewImage(this, 'imagePreviewTwo');
-    updateFileName(this, 'fileNameTwo');
-});
+        previewImage(this, 'imagePreviewTwo');
+        updateFileName(this, 'fileNameTwo');
+    });
 }
 
-    // Load all data
-    async function loadData() {
+// Load all data
+async function loadData() {
     try {
-    showLoading(true);
-    await loadFields();
-    await loadStats();
-    showSuccess('Data loaded successfully');
-} catch (error) {
-    showError('Failed to load data: ' + error.message);
-} finally {
-    showLoading(false);
+        showLoading(true);
+        await loadFields();
+        await loadStats();
+        showSuccess('Data loaded successfully');
+    } catch (error) {
+        showError('Failed to load data: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
 }
-}
-
 
 // Update the loadFields function to initialize pagination
 async function loadFields() {
     try {
-        const response = await fetch(API_BASE_URL);
+        const response = await makeAuthenticatedRequest(API_BASE_URL);
+        if (!response) return; // Authentication failed
+
         if (!response.ok) throw new Error('Failed to fetch fields');
 
         fieldsData = await response.json();
@@ -189,23 +237,25 @@ function goToPage(page) {
     setupPagination();
 }
 
-    // Load statistics
-    async function loadStats() {
+// Load statistics
+async function loadStats() {
     try {
-    const response = await fetch(API_BASE_URL);
-    if (!response.ok) throw new Error('Failed to fetch stats');
+        const response = await makeAuthenticatedRequest(API_BASE_URL);
+        if (!response) return; // Authentication failed
 
-    const fields = await response.json();
-    const totalFields = fields.length;
-    const totalArea = fields.reduce((sum, field) => sum + (field.extent_size || 0), 0);
-    const activeStaff = Math.floor(Math.random() * 20) + 5; // Demo data
+        if (!response.ok) throw new Error('Failed to fetch stats');
 
-    document.getElementById('totalFields').textContent = totalFields;
-    document.getElementById('totalArea').textContent = totalArea.toFixed(2);
-    document.getElementById('activeStaff').textContent = activeStaff;
-} catch (error) {
-    console.error('Error loading stats:', error);
-}
+        const fields = await response.json();
+        const totalFields = fields.length;
+        const totalArea = fields.reduce((sum, field) => sum + (field.extent_size || 0), 0);
+        const activeStaff = Math.floor(Math.random() * 20) + 5; // Demo data
+
+        document.getElementById('totalFields').textContent = totalFields;
+        document.getElementById('totalArea').textContent = totalArea.toFixed(2);
+        document.getElementById('activeStaff').textContent = activeStaff;
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
 }
 
 // Update the renderFieldsTable function to use pagination
@@ -267,7 +317,9 @@ function renderFieldsTable() {
 // Add this function to generate the next field ID
 async function generateNextFieldId() {
     try {
-        const response = await fetch(API_BASE_URL);
+        const response = await makeAuthenticatedRequest(API_BASE_URL);
+        if (!response) return "F001"; // Fallback if authentication fails
+
         if (!response.ok) throw new Error('Failed to fetch fields');
 
         const fields = await response.json();
@@ -344,67 +396,71 @@ async function openAddModal() {
     openModal('fieldFormPopup');
 }
 
-    // View field details
-    async function viewField(fieldCode) {
+// View field details
+async function viewField(fieldCode) {
     try {
-    const response = await fetch(`${API_BASE_URL}/${fieldCode}`);
-    if (!response.ok) throw new Error('Failed to fetch field details');
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/${fieldCode}`);
+        if (!response) return; // Authentication failed
 
-    const field = await response.json();
+        if (!response.ok) throw new Error('Failed to fetch field details');
 
-    const detailsHtml = `
-        <div class="field-details-grid">
-          <div class="detail-item">
-            <label><i class="fas fa-barcode"></i> Field Code</label>
-            <span>${field.fieldCode}</span>
-          </div>
-          <div class="detail-item">
-            <label><i class="fas fa-signature"></i> Field Name</label>
-            <span>${field.fieldName}</span>
-          </div>
-          <div class="detail-item full-width">
-            <label><i class="fas fa-map-marker-alt"></i> Location</label>
-            <span>${field.fieldLocation}</span>
-          </div>
-          <div class="detail-item">
-            <label><i class="fas fa-ruler-combined"></i> Extent Size</label>
-            <span>${field.extent_size ? field.extent_size.toFixed(2) : '0.00'} Acres</span>
-          </div>
-          <div class="detail-item">
-            <label><i class="fas fa-clipboard-list"></i> Log Code</label>
-            <span>${field.logCode || 'N/A'}</span>
-          </div>
-          <div class="detail-item full-width">
-            <label><i class="fas fa-images"></i> Field Images</label>
-            <div class="image-preview-container">
-              <div class="image-preview">
-                ${field.fieldImageOne ?
-    `<img src="data:image/jpeg;base64,${field.fieldImageOne}" alt="Field Image">` :
-    `<div class="no-image"><i class="fas fa-image"></i><p>No image available</p></div>`
-}
+        const field = await response.json();
+
+        const detailsHtml = `
+            <div class="field-details-grid">
+              <div class="detail-item">
+                <label><i class="fas fa-barcode"></i> Field Code</label>
+                <span>${field.fieldCode}</span>
               </div>
-              <div class="image-preview">
-                ${field.fieldImageTwo ?
-    `<img src="data:image/jpeg;base64,${field.fieldImageTwo}" alt="Field Image">` :
-    `<div class="no-image"><i class="fas fa-image"></i><p>No image available</p></div>`
-}
+              <div class="detail-item">
+                <label><i class="fas fa-signature"></i> Field Name</label>
+                <span>${field.fieldName}</span>
+              </div>
+              <div class="detail-item full-width">
+                <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                <span>${field.fieldLocation}</span>
+              </div>
+              <div class="detail-item">
+                <label><i class="fas fa-ruler-combined"></i> Extent Size</label>
+                <span>${field.extent_size ? field.extent_size.toFixed(2) : '0.00'} Acres</span>
+              </div>
+              <div class="detail-item">
+                <label><i class="fas fa-clipboard-list"></i> Log Code</label>
+                <span>${field.logCode || 'N/A'}</span>
+              </div>
+              <div class="detail-item full-width">
+                <label><i class="fas fa-images"></i> Field Images</label>
+                <div class="image-preview-container">
+                  <div class="image-preview">
+                    ${field.fieldImageOne ?
+            `<img src="data:image/jpeg;base64,${field.fieldImageOne}" alt="Field Image">` :
+            `<div class="no-image"><i class="fas fa-image"></i><p>No image available</p></div>`
+        }
+                  </div>
+                  <div class="image-preview">
+                    ${field.fieldImageTwo ?
+            `<img src="data:image/jpeg;base64,${field.fieldImageTwo}" alt="Field Image">` :
+            `<div class="no-image"><i class="fas fa-image"></i><p>No image available</p></div>`
+        }
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      `;
+          `;
 
-    document.getElementById('fieldDetails').innerHTML = detailsHtml;
-    openModal('viewFieldPopup');
-} catch (error) {
-    showError('Failed to load field details: ' + error.message);
-}
+        document.getElementById('fieldDetails').innerHTML = detailsHtml;
+        openModal('viewFieldPopup');
+    } catch (error) {
+        showError('Failed to load field details: ' + error.message);
+    }
 }
 
 // Update the editField function
 async function editField(fieldCode) {
     try {
-        const response = await fetch(`${API_BASE_URL}/${fieldCode}`);
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/${fieldCode}`);
+        if (!response) return; // Authentication failed
+
         if (!response.ok) throw new Error('Failed to fetch field for edit');
 
         const field = await response.json();
@@ -442,8 +498,8 @@ async function editField(fieldCode) {
     }
 }
 
-    // Save field (create or update)
-    async function saveField() {
+// Save field (create or update)
+async function saveField() {
     const formData = new FormData();
 
     // Get form values
@@ -457,9 +513,9 @@ async function editField(fieldCode) {
 
     // Validate required fields
     if (!fieldCode || !fieldName || !fieldLocation || !extentSize || !logCode) {
-    showError('Please fill in all required fields');
-    return;
-}
+        showError('Please fill in all required fields');
+        return;
+    }
 
     // Append data to FormData
     formData.append('fieldCode', fieldCode);
@@ -472,54 +528,70 @@ async function editField(fieldCode) {
     if (imageTwo) formData.append('fieldImageTwo', imageTwo);
 
     try {
-    const url = isEditMode ? `${API_BASE_URL}/${currentFieldCode}` : API_BASE_URL;
-    const method = isEditMode ? 'PUT' : 'POST';
+        const url = isEditMode ? `${API_BASE_URL}/${currentFieldCode}` : API_BASE_URL;
+        const method = isEditMode ? 'PUT' : 'POST';
 
-    const response = await fetch(url, {
-    method: method,
-    body: formData
-});
+        // For FormData, we need to let the browser set the Content-Type header
+        const options = {
+            method: method,
+            body: formData,
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`
+            }
+        };
 
-    if (response.status === 201 || response.status === 204) {
-    showSuccess(`Field ${isEditMode ? 'updated' : 'added'} successfully!`);
-    closeModal();
-    loadData();
-} else {
-    throw new Error(`Server returned status: ${response.status}`);
-}
-} catch (error) {
-    showError('Failed to save field: ' + error.message);
-}
+        const response = await fetch(url, options);
+
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('jwtToken');
+            jwtToken = null;
+            showError('Session expired. Please login again.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (response.status === 201 || response.status === 204) {
+            showSuccess(`Field ${isEditMode ? 'updated' : 'added'} successfully!`);
+            closeModal();
+            loadData();
+        } else {
+            throw new Error(`Server returned status: ${response.status}`);
+        }
+    } catch (error) {
+        showError('Failed to save field: ' + error.message);
+    }
 }
 
-    // Delete field
-    async function deleteField(fieldCode) {
+// Delete field
+async function deleteField(fieldCode) {
     const result = await Swal.fire({
-    title: 'Are you sure?',
-    text: "You won't be able to revert this!",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, delete it!'
-});
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+    });
 
     if (!result.isConfirmed) return;
 
     try {
-    const response = await fetch(`${API_BASE_URL}/${fieldCode}`, {
-    method: 'DELETE'
-});
+        const response = await makeAuthenticatedRequest(`${API_BASE_URL}/${fieldCode}`, {
+            method: 'DELETE'
+        });
 
-    if (response.ok) {
-    showSuccess('Field deleted successfully!');
-    loadData();
-} else {
-    throw new Error('Failed to delete field');
-}
-} catch (error) {
-    showError('Failed to delete field: ' + error.message);
-}
+        if (!response) return; // Authentication failed
+
+        if (response.ok) {
+            showSuccess('Field deleted successfully!');
+            loadData();
+        } else {
+            throw new Error('Failed to delete field');
+        }
+    } catch (error) {
+        showError('Failed to delete field: ' + error.message);
+    }
 }
 
 // Update the filterFields function to work with pagination
@@ -543,54 +615,54 @@ function filterFields() {
     renderFieldsTable();
 }
 
-    // Image preview
-    function previewImage(input, previewId) {
+// Image preview
+function previewImage(input, previewId) {
     const preview = document.getElementById(previewId);
     const file = input.files[0];
 
     if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-};
-    reader.readAsDataURL(file);
-} else {
-    preview.innerHTML = '<i class="fas fa-image text-muted"></i>';
-}
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '<i class="fas fa-image text-muted"></i>';
+    }
 }
 
-    // Update file name display
-    function updateFileName(input, fileNameId) {
+// Update file name display
+function updateFileName(input, fileNameId) {
     const fileNameDisplay = document.getElementById(fileNameId);
     if (input.files.length > 0) {
-    fileNameDisplay.textContent = input.files[0].name;
-} else {
-    fileNameDisplay.textContent = 'No file chosen';
-}
+        fileNameDisplay.textContent = input.files[0].name;
+    } else {
+        fileNameDisplay.textContent = 'No file chosen';
+    }
 }
 
-    // Open modal
-    function openModal(modalId) {
+// Open modal
+function openModal(modalId) {
     document.getElementById(modalId).classList.add('active');
 }
 
-    // Close modal
-    function closeModal() {
+// Close modal
+function closeModal() {
     document.getElementById('fieldFormPopup').classList.remove('active');
 }
 
-    // Close view modal
-    function closeViewModal() {
+// Close view modal
+function closeViewModal() {
     document.getElementById('viewFieldPopup').classList.remove('active');
 }
 
-    // Show/hide loading spinner
-    function showLoading(show) {
+// Show/hide loading spinner
+function showLoading(show) {
     document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
 }
 
-    // Utility functions
-    function showError(message) {
+// Utility functions
+function showError(message) {
     Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -599,7 +671,7 @@ function filterFields() {
     });
 }
 
-    function showSuccess(message) {
+function showSuccess(message) {
     Swal.fire({
         icon: 'success',
         title: 'Success',
@@ -609,8 +681,8 @@ function filterFields() {
     });
 }
 
-    // Add this function to set up report event listeners
-    function setupReportListeners() {
+// Add this function to set up report event listeners
+function setupReportListeners() {
     // Report tab switching
     document.querySelectorAll('.tab-btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -638,22 +710,22 @@ function filterFields() {
 
     // Report range change
     document.getElementById('reportRange').addEventListener('change', function() {
-    generateAllReports();
-});
+        generateAllReports();
+    });
 
     // Location filter change
     document.getElementById('locationFilter').addEventListener('change', function() {
-    generateAllReports();
-});
+        generateAllReports();
+    });
 
     // Generate all reports button
     document.getElementById('generateAllReportsBtn').addEventListener('click', function() {
-    generateAllReports();
-});
+        generateAllReports();
+    });
 }
 
-    // Add this function to initialize reports
-    function initializeReports() {
+// Add this function to initialize reports
+function initializeReports() {
     // Populate location filter
     populateLocationFilter();
 
@@ -664,27 +736,27 @@ function filterFields() {
     generateAllReports();
 }
 
-    // Add this function to populate location filter
-    function populateLocationFilter() {
+// Add this function to populate location filter
+function populateLocationFilter() {
     const locationFilter = document.getElementById('locationFilter');
     const locations = [...new Set(fieldsData.map(field => field.fieldLocation))];
 
     // Clear existing options except "All Locations"
     while (locationFilter.options.length > 1) {
-    locationFilter.remove(1);
-}
+        locationFilter.remove(1);
+    }
 
     // Add locations to filter
     locations.forEach(location => {
-    const option = document.createElement('option');
-    option.value = location;
-    option.textContent = location;
-    locationFilter.appendChild(option);
-});
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        locationFilter.appendChild(option);
+    });
 }
 
-    // Add this function to generate all reports
-    function generateAllReports() {
+// Add this function to generate all reports
+function generateAllReports() {
     generateReport('area');
     generateReport('location');
     generateReport('utilization');
@@ -692,26 +764,26 @@ function filterFields() {
     updateSummaryStats();
 }
 
-    // Add this function to generate specific report
-    function generateReport(reportType) {
+// Add this function to generate specific report
+function generateReport(reportType) {
     switch (reportType) {
-    case 'area':
-    generateAreaReport();
-    break;
-    case 'location':
-    generateLocationReport();
-    break;
-    case 'utilization':
-    generateUtilizationReport();
-    break;
-    case 'comparison':
-    generateComparisonReport();
-    break;
-}
+        case 'area':
+            generateAreaReport();
+            break;
+        case 'location':
+            generateLocationReport();
+            break;
+        case 'utilization':
+            generateUtilizationReport();
+            break;
+        case 'comparison':
+            generateComparisonReport();
+            break;
+    }
 }
 
-    // Add this function to update summary stats
-    function updateSummaryStats() {
+// Add this function to update summary stats
+function updateSummaryStats() {
     const filteredFields = getFilteredFields();
     const totalFields = filteredFields.length;
     const totalArea = filteredFields.reduce((sum, field) => sum + (field.extent_size || 0), 0);
@@ -724,8 +796,8 @@ function filterFields() {
     document.getElementById('summaryAvgSize').textContent = avgSize.toFixed(2);
 }
 
-    // Add this function to get filtered fields based on report filters
-    function getFilteredFields() {
+// Add this function to get filtered fields based on report filters
+function getFilteredFields() {
     const locationFilter = document.getElementById('locationFilter').value;
     const dateRange = document.getElementById('reportRange').value;
 
@@ -733,8 +805,8 @@ function filterFields() {
 
     // Filter by location
     if (locationFilter !== 'all') {
-    filteredFields = filteredFields.filter(field => field.fieldLocation === locationFilter);
-}
+        filteredFields = filteredFields.filter(field => field.fieldLocation === locationFilter);
+    }
 
     // Note: Since we don't have date fields in the sample data,
     // this would need to be implemented with actual date fields
@@ -743,30 +815,30 @@ function filterFields() {
     return filteredFields;
 }
 
-    // Add this function to generate area report
-    function generateAreaReport() {
+// Add this function to generate area report
+function generateAreaReport() {
     const filteredFields = getFilteredFields();
 
     // Categorize fields by size
     const sizeCategories = {
-    'Small (<5 acres)': 0,
-    'Medium (5-20 acres)': 0,
-    'Large (20-50 acres)': 0,
-    'Very Large (>50 acres)': 0
-};
+        'Small (<5 acres)': 0,
+        'Medium (5-20 acres)': 0,
+        'Large (20-50 acres)': 0,
+        'Very Large (>50 acres)': 0
+    };
 
     filteredFields.forEach(field => {
-    const size = field.extent_size || 0;
-    if (size < 5) {
-    sizeCategories['Small (<5 acres)']++;
-} else if (size >= 5 && size < 20) {
-    sizeCategories['Medium (5-20 acres)']++;
-} else if (size >= 20 && size < 50) {
-    sizeCategories['Large (20-50 acres)']++;
-} else {
-    sizeCategories['Very Large (>50 acres)']++;
-}
-});
+        const size = field.extent_size || 0;
+        if (size < 5) {
+            sizeCategories['Small (<5 acres)']++;
+        } else if (size >= 5 && size < 20) {
+            sizeCategories['Medium (5-20 acres)']++;
+        } else if (size >= 20 && size < 50) {
+            sizeCategories['Large (20-50 acres)']++;
+        } else {
+            sizeCategories['Very Large (>50 acres)']++;
+        }
+    });
 
     // Prepare chart data
     const labels = Object.keys(sizeCategories);
@@ -775,40 +847,40 @@ function filterFields() {
 
     // Destroy previous chart if it exists
     if (charts.areaChart) {
-    charts.areaChart.destroy();
-}
+        charts.areaChart.destroy();
+    }
 
     // Create chart
     const ctx = document.getElementById('areaChart').getContext('2d');
     charts.areaChart = new Chart(ctx, {
-    type: 'pie',
-    data: {
-    labels: labels,
-    datasets: [{
-    data: data,
-    backgroundColor: colors,
-    borderWidth: 1
-}]
-},
-    options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-    legend: {
-    position: 'bottom'
-},
-    title: {
-    display: true,
-    text: 'Field Size Distribution'
-}
-}
-}
-});
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Field Size Distribution'
+                }
+            }
+        }
+    });
 
     // Generate insights
     const totalFields = filteredFields.length;
     const largestCategory = Object.keys(sizeCategories).reduce((a, b) =>
-    sizeCategories[a] > sizeCategories[b] ? a : b
+        sizeCategories[a] > sizeCategories[b] ? a : b
     );
 
     const insightsHtml = `
@@ -821,16 +893,16 @@ function filterFields() {
     document.getElementById('areaInsights').innerHTML = insightsHtml;
 }
 
-    // Add this function to generate location report
-    function generateLocationReport() {
+// Add this function to generate location report
+function generateLocationReport() {
     const filteredFields = getFilteredFields();
 
     // Group fields by location
     const locationCounts = {};
     filteredFields.forEach(field => {
-    const location = field.fieldLocation;
-    locationCounts[location] = (locationCounts[location] || 0) + 1;
-});
+        const location = field.fieldLocation;
+        locationCounts[location] = (locationCounts[location] || 0) + 1;
+    });
 
     // Prepare chart data
     const labels = Object.keys(locationCounts);
@@ -839,49 +911,49 @@ function filterFields() {
 
     // Destroy previous chart if it exists
     if (charts.locationChart) {
-    charts.locationChart.destroy();
-}
+        charts.locationChart.destroy();
+    }
 
     // Create chart
     const ctx = document.getElementById('locationChart').getContext('2d');
     charts.locationChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-    labels: labels,
-    datasets: [{
-    label: 'Number of Fields',
-    data: data,
-    backgroundColor: colors,
-    borderWidth: 1
-}]
-},
-    options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-    legend: {
-    display: false
-},
-    title: {
-    display: true,
-    text: 'Fields by Location'
-}
-},
-    scales: {
-    y: {
-    beginAtZero: true,
-    ticks: {
-    precision: 0
-}
-}
-}
-}
-});
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Fields',
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Fields by Location'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
 
     // Generate insights
     const totalLocations = labels.length;
     const mostFieldsLocation = labels.reduce((a, b) =>
-    locationCounts[a] > locationCounts[b] ? a : b
+        locationCounts[a] > locationCounts[b] ? a : b
     );
 
     const insightsHtml = `
@@ -894,18 +966,18 @@ function filterFields() {
     document.getElementById('locationInsights').innerHTML = insightsHtml;
 }
 
-    // Add this function to generate utilization report
-    function generateUtilizationReport() {
+// Add this function to generate utilization report
+function generateUtilizationReport() {
     const filteredFields = getFilteredFields();
 
     // For demonstration, we'll create some mock utilization data
     // In a real application, this would come from your actual utilization data
     const utilizationData = {
-    'High Utilization': Math.floor(filteredFields.length * 0.4),
-    'Medium Utilization': Math.floor(filteredFields.length * 0.35),
-    'Low Utilization': Math.floor(filteredFields.length * 0.2),
-    'Idle': Math.floor(filteredFields.length * 0.05)
-};
+        'High Utilization': Math.floor(filteredFields.length * 0.4),
+        'Medium Utilization': Math.floor(filteredFields.length * 0.35),
+        'Low Utilization': Math.floor(filteredFields.length * 0.2),
+        'Idle': Math.floor(filteredFields.length * 0.05)
+    };
 
     // Prepare chart data
     const labels = Object.keys(utilizationData);
@@ -914,35 +986,35 @@ function filterFields() {
 
     // Destroy previous chart if it exists
     if (charts.utilizationChart) {
-    charts.utilizationChart.destroy();
-}
+        charts.utilizationChart.destroy();
+    }
 
     // Create chart
     const ctx = document.getElementById('utilizationChart').getContext('2d');
     charts.utilizationChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-    labels: labels,
-    datasets: [{
-    data: data,
-    backgroundColor: colors,
-    borderWidth: 1
-}]
-},
-    options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-    legend: {
-    position: 'bottom'
-},
-    title: {
-    display: true,
-    text: 'Field Utilization Rates'
-}
-}
-}
-});
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                title: {
+                    display: true,
+                    text: 'Field Utilization Rates'
+                }
+            }
+        }
+    });
 
     // Generate insights
     const totalFields = filteredFields.length;
@@ -959,14 +1031,14 @@ function filterFields() {
     document.getElementById('utilizationInsights').innerHTML = insightsHtml;
 }
 
-    // Add this function to generate comparison report
-    function generateComparisonReport() {
+// Add this function to generate comparison report
+function generateComparisonReport() {
     const filteredFields = getFilteredFields();
 
     // For this demo, we'll compare the top 5 largest fields
     const sortedFields = [...filteredFields]
-    .sort((a, b) => (b.extent_size || 0) - (a.extent_size || 0))
-    .slice(0, 5);
+        .sort((a, b) => (b.extent_size || 0) - (a.extent_size || 0))
+        .slice(0, 5);
 
     // Prepare chart data
     const labels = sortedFields.map(field => field.fieldName);
@@ -975,45 +1047,45 @@ function filterFields() {
 
     // Destroy previous chart if it exists
     if (charts.comparisonChart) {
-    charts.comparisonChart.destroy();
-}
+        charts.comparisonChart.destroy();
+    }
 
     // Create chart
     const ctx = document.getElementById('comparisonChart').getContext('2d');
     charts.comparisonChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-    labels: labels,
-    datasets: [{
-    label: 'Size (Acres)',
-    data: sizes,
-    backgroundColor: colors,
-    borderWidth: 1
-}]
-},
-    options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-    legend: {
-    display: false
-},
-    title: {
-    display: true,
-    text: 'Largest Fields Comparison'
-}
-},
-    scales: {
-    y: {
-    beginAtZero: true,
-    title: {
-    display: true,
-    text: 'Acres'
-}
-}
-}
-}
-});
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Size (Acres)',
+                data: sizes,
+                backgroundColor: colors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Largest Fields Comparison'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Acres'
+                    }
+                }
+            }
+        }
+    });
 
     // Generate insights
     const largestField = sortedFields[0];
@@ -1029,33 +1101,39 @@ function filterFields() {
     document.getElementById('comparisonInsights').innerHTML = insightsHtml;
 }
 
-    // Add this utility function to generate colors
-    function generateColors(count) {
+// Add this utility function to generate colors
+function generateColors(count) {
     const baseColors = [
-    '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
-    '#673ab7', '#3f51b5', '#00bcd4', '#009688', '#cddc39'
+        '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
+        '#673ab7', '#3f51b5', '#00bcd4', '#009688', '#cddc39'
     ];
 
     const colors = [];
     for (let i = 0; i < count; i++) {
-    colors.push(baseColors[i % baseColors.length]);
-}
+        colors.push(baseColors[i % baseColors.length]);
+    }
 
     return colors;
 }
 
-    // Update the loadData function to initialize reports
-    // Replace the existing loadData function with this one
-    async function loadData() {
+// Update the loadData function to initialize reports
+async function loadData() {
     try {
-    showLoading(true);
-    await loadFields();
-    await loadStats();
-    initializeReports(); // Add this line
-    showSuccess('Data loaded successfully');
-} catch (error) {
-    showError('Failed to load data: ' + error.message);
-} finally {
-    showLoading(false);
+        showLoading(true);
+        await loadFields();
+        await loadStats();
+        initializeReports(); // Add this line
+        showSuccess('Data loaded successfully');
+    } catch (error) {
+        showError('Failed to load data: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
 }
+
+// Logout function (add this if you need a logout button)
+function logout() {
+    localStorage.removeItem('jwtToken');
+    jwtToken = null;
+    window.location.href = 'login.html';
 }

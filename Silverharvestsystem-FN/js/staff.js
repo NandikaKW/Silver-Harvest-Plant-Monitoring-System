@@ -1,9 +1,17 @@
+// Pagination variables
+let currentPage = 1;
+let pageSize = 10;
+let totalPages = 1;
+let filteredStaffList = [];
 // Add these constants at the top of your script
 const STAFF_ID_PREFIX = 'S';
 const LOG_CODE_PREFIX = 'LOG';
 
 // Base API URL
 const API_BASE_URL = 'http://localhost:8080/api/v1/staff';
+
+// JWT Token management
+let jwtToken = localStorage.getItem('jwtToken');
 
 // DOM Elements
 const staffForm = document.getElementById('staffForm');
@@ -17,9 +25,154 @@ const searchInput = document.getElementById('searchInput');
 const staffTableBody = document.getElementById('staffTableBody');
 const editMode = document.getElementById('editMode');
 const editStaffId = document.getElementById('editStaffId');
+// Initialize pagination
+function initPagination() {
+    document.getElementById('firstPageBtn').addEventListener('click', () => goToPage(1));
+    document.getElementById('prevPageBtn').addEventListener('click', () => goToPage(currentPage - 1));
+    document.getElementById('nextPageBtn').addEventListener('click', () => goToPage(currentPage + 1));
+    document.getElementById('lastPageBtn').addEventListener('click', () => goToPage(totalPages));
 
-// Event Listeners
+    document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+        pageSize = parseInt(e.target.value);
+        currentPage = 1;
+        updatePagination();
+    });
+}
+
+// Update pagination controls
+function updatePagination() {
+    const totalRecords = filteredStaffList.length;
+    totalPages = Math.ceil(totalRecords / pageSize);
+
+    // Ensure current page is within valid range
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    // Calculate start and end indices
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalRecords);
+
+    // Update pagination info
+    document.getElementById('currentPageStart').textContent = totalRecords > 0 ? startIndex + 1 : 0;
+    document.getElementById('currentPageEnd').textContent = endIndex;
+    document.getElementById('totalRecords').textContent = totalRecords;
+
+    // Update pagination buttons state
+    document.getElementById('firstPageBtn').disabled = currentPage === 1;
+    document.getElementById('prevPageBtn').disabled = currentPage === 1;
+    document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+    document.getElementById('lastPageBtn').disabled = currentPage === totalPages;
+
+    // Generate page numbers
+    const pageNumbersContainer = document.getElementById('pageNumbers');
+    pageNumbersContainer.innerHTML = '';
+
+    // Show up to 5 page numbers with ellipsis if needed
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+    }
+
+    if (startPage > 1) {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.style.padding = '0 0.5rem';
+        pageNumbersContainer.appendChild(ellipsis);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener('click', () => goToPage(i));
+        pageNumbersContainer.appendChild(pageBtn);
+    }
+
+    if (endPage < totalPages) {
+        const ellipsis = document.createElement('span');
+        ellipsis.textContent = '...';
+        ellipsis.style.padding = '0 0.5rem';
+        pageNumbersContainer.appendChild(ellipsis);
+    }
+
+    // Get current page data and populate table
+    const currentPageData = filteredStaffList.slice(startIndex, endIndex);
+    populateStaffTable(currentPageData);
+}
+
+// Navigate to specific page
+function goToPage(page) {
+    if (page < 1 || page > totalPages) return;
+
+    currentPage = page;
+    updatePagination();
+}
+
+
+// Enhanced fetch function with JWT
+async function fetchWithAuth(url, options = {}) {
+    // Check if token exists and is valid
+    if (!jwtToken || isTokenExpired(jwtToken)) {
+        // If token is expired or missing, try to get a new one
+        // You might want to redirect to login or show a modal
+        console.error('JWT token is missing or expired');
+        showError('Authentication required. Please login again.');
+        return Promise.reject('Authentication required');
+    }
+
+    const defaultOptions = {
+        headers: {
+            'Authorization': `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    };
+
+    const mergedOptions = { ...defaultOptions, ...options };
+
+    try {
+        const response = await fetch(url, mergedOptions);
+
+        // Handle authentication errors
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('jwtToken');
+            jwtToken = null;
+            showError('Session expired. Please login again.');
+            throw new Error('Authentication failed');
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
+
+// Check if token is expired
+function isTokenExpired(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.exp * 1000 < Date.now();
+    } catch (e) {
+        return true;
+    }
+}
+
+// Event Listeners - Modified to check authentication
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if we have a valid token
+    if (!jwtToken || isTokenExpired(jwtToken)) {
+        showError('Please login to access staff management');
+        return;
+    }
+    // Add this with the other initialization code
+    initPagination();
     populateLogCodeDropdown();
     loadStaffData();
     loadStats();
@@ -35,36 +188,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Search functionality
     searchInput.addEventListener('input', filterStaff);
-    // Add to your existing DOMContentLoaded event listener:
 
-// Export button
+    // Export button
     document.getElementById('exportBtn').addEventListener('click', exportToCSV);
 
-// Print button
+    // Print button
     document.getElementById('printBtn').addEventListener('click', printTable);
 
-// Filter button
+    // Filter button
     document.getElementById('filterBtn').addEventListener('click', filterByRole);
 
-// Generate full report button
+    // Generate full report button
     document.getElementById('generateReportBtn').addEventListener('click', generateFullReport);
 
-// Close report modal
+    // Close report modal
     document.querySelectorAll('.close-report-modal').forEach(btn => {
         btn.addEventListener('click', () => {
             document.getElementById('reportModal').classList.remove('active');
         });
     });
 
-    // Add this to your existing DOMContentLoaded event listener:
     document.querySelectorAll('.close-view-popup').forEach(btn => {
         btn.addEventListener('click', () => {
             document.getElementById('viewStaffPopup').classList.remove('active');
         });
     });
+
     // Export report button
     document.getElementById('exportReportBtn').addEventListener('click', () => {
-        // Create a printable version of the report
         const printContent = document.getElementById('reportModal').innerHTML;
         const originalContent = document.body.innerHTML;
 
@@ -94,7 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         window.print();
         document.body.innerHTML = originalContent;
-        // Reload the page to restore functionality
         window.location.reload();
     });
 
@@ -106,15 +256,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Load all staff data
+// Update the loadStaffData function
 async function loadStaffData() {
     try {
         showLoading(true);
-        const response = await fetch(API_BASE_URL + '/all');
-        if (!response.ok) throw new Error('Failed to fetch staff data');
-
+        const response = await fetchWithAuth(API_BASE_URL + '/all');
         const staffList = await response.json();
-        populateStaffTable(staffList);
+
+        // Store the full staff list and set filtered list
+        filteredStaffList = staffList;
+
+        // Initialize pagination
+        updatePagination();
         showLoading(false);
     } catch (error) {
         console.error('Error loading staff data:', error);
@@ -123,12 +276,10 @@ async function loadStaffData() {
     }
 }
 
-// Load statistics
+// Load statistics - MODIFIED to use fetchWithAuth
 async function loadStats() {
     try {
-        const response = await fetch(API_BASE_URL + '/all');
-        if (!response.ok) throw new Error('Failed to fetch stats');
-
+        const response = await fetchWithAuth(API_BASE_URL + '/all');
         const staffList = await response.json();
         updateStats(staffList);
     } catch (error) {
@@ -204,13 +355,11 @@ function addActionButtonListeners() {
     });
 }
 
-// Handle form submission
+// Handle form submission - MODIFIED to use fetchWithAuth
 async function handleFormSubmit(e) {
     e.preventDefault();
 
     const formData = new FormData(staffForm);
-
-    // Create staff data object matching the DTO structure
     const staffData = {
         staffId: document.getElementById('staffIdInput').value,
         firstName: formData.get('firstName'),
@@ -231,15 +380,11 @@ async function handleFormSubmit(e) {
 
     try {
         if (editMode.value === 'true') {
-            // Update existing staff
             const staffIdToUpdate = formData.get('staffId');
-            staffData.staffId = staffIdToUpdate; // enforce ID match
+            staffData.staffId = staffIdToUpdate;
 
-            const response = await fetch(`${API_BASE_URL}/${staffIdToUpdate}`, {
+            const response = await fetchWithAuth(`${API_BASE_URL}/${staffIdToUpdate}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(staffData)
             });
 
@@ -250,12 +395,8 @@ async function handleFormSubmit(e) {
 
             showSuccess('Staff updated successfully');
         } else {
-            // Create new staff
-            const response = await fetch(API_BASE_URL, {
+            const response = await fetchWithAuth(API_BASE_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(staffData)
             });
 
@@ -277,15 +418,12 @@ async function handleFormSubmit(e) {
 }
 
 
-// View staff details
+// View staff details - MODIFIED to use fetchWithAuth
 async function viewStaff(staffId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/${staffId}`);
-        if (!response.ok) throw new Error('Failed to fetch staff details');
-
+        const response = await fetchWithAuth(`${API_BASE_URL}/${staffId}`);
         const staff = await response.json();
 
-        // Populate details
         document.getElementById('detail-id').textContent = staff.staffId || '--';
         document.getElementById('detail-name').textContent = `${staff.firstName || ''} ${staff.lastName || ''}`;
         document.getElementById('detail-designation').textContent = staff.designation || '--';
@@ -300,7 +438,6 @@ async function viewStaff(staffId) {
         document.getElementById('detail-role').className = `status-badge role-${staff.role?.toLowerCase() || 'other'}`;
         document.getElementById('detail-logCode').textContent = staff.logCode || '--';
 
-        // Show popup
         viewStaffPopup.classList.add('active');
     } catch (error) {
         console.error('Error viewing staff:', error);
@@ -308,15 +445,13 @@ async function viewStaff(staffId) {
     }
 }
 
-// Modify the openEditForm function
+
+// Open edit form - MODIFIED to use fetchWithAuth
 async function openEditForm(staffId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/${staffId}`);
-        if (!response.ok) throw new Error('Failed to fetch staff data');
-
+        const response = await fetchWithAuth(`${API_BASE_URL}/${staffId}`);
         const staff = await response.json();
 
-        // Populate form
         document.getElementById('popupTitle').textContent = 'Edit Staff';
         document.getElementById('editMode').value = 'true';
         document.getElementById('editStaffId').value = staff.staffId;
@@ -332,11 +467,9 @@ async function openEditForm(staffId) {
         document.getElementById('emailInput').value = staff.email || '';
         document.getElementById('roleInput').value = staff.role || '';
 
-        // Populate log code dropdown and select the current value
         await populateLogCodeDropdown();
         document.getElementById('logCodeSelect').value = staff.logCode || '';
 
-        // Show popup
         staffFormPopup.classList.add('active');
     } catch (error) {
         console.error('Error opening edit form:', error);
@@ -344,28 +477,23 @@ async function openEditForm(staffId) {
     }
 }
 
-// Add this function to generate log code options
+// Populate log code dropdown - MODIFIED to use fetchWithAuth
 async function populateLogCodeDropdown() {
     try {
-        const response = await fetch(API_BASE_URL + '/all');
-        if (!response.ok) throw new Error('Failed to fetch staff data');
-
+        const response = await fetchWithAuth(API_BASE_URL + '/all');
         const staffList = await response.json();
         const logCodeSelect = document.getElementById('logCodeSelect');
 
-        // Clear existing options except the first one
         while (logCodeSelect.options.length > 1) {
             logCodeSelect.remove(1);
         }
 
-        // Extract all existing log codes and remove duplicates
         const existingLogCodes = [...new Set(
             staffList
                 .map(staff => staff.logCode)
                 .filter(code => code && code.startsWith('LOG'))
         )].sort();
 
-        // Find the highest numeric part
         let maxNumber = 0;
         existingLogCodes.forEach(code => {
             const numPart = parseInt(code.replace('LOG', ''));
@@ -374,7 +502,6 @@ async function populateLogCodeDropdown() {
             }
         });
 
-        // Generate options for existing log codes
         existingLogCodes.forEach(code => {
             const option = document.createElement('option');
             option.value = code;
@@ -382,7 +509,6 @@ async function populateLogCodeDropdown() {
             logCodeSelect.appendChild(option);
         });
 
-        // Generate the next log code option only if we're in add mode
         if (document.getElementById('editMode').value === 'false') {
             const nextNumber = maxNumber + 1;
             const nextLogCode = `LOG${nextNumber.toString().padStart(3, '0')}`;
@@ -396,7 +522,6 @@ async function populateLogCodeDropdown() {
 
     } catch (error) {
         console.error('Error populating log codes:', error);
-        // Fallback: create basic options
         const logCodeSelect = document.getElementById('logCodeSelect');
         for (let i = 1; i <= 10; i++) {
             const code = `LOG${i.toString().padStart(3, '0')}`;
@@ -421,19 +546,15 @@ function openAddForm() {
 }
 
 
-// Modify the generateStaffId function
+// Generate staff ID - MODIFIED to use fetchWithAuth
 async function generateStaffId() {
     try {
-        const response = await fetch(API_BASE_URL + '/all');
-        if (!response.ok) throw new Error('Failed to fetch staff data');
-
+        const response = await fetchWithAuth(API_BASE_URL + '/all');
         const staffList = await response.json();
 
-        // Extract all existing staff IDs
         const existingIds = staffList.map(staff => staff.staffId).filter(id => id && id.startsWith(STAFF_ID_PREFIX));
-
-        // Find the highest numeric part
         let maxNumber = 0;
+
         existingIds.forEach(id => {
             const numPart = parseInt(id.replace(STAFF_ID_PREFIX, ''));
             if (!isNaN(numPart) && numPart > maxNumber) {
@@ -441,14 +562,11 @@ async function generateStaffId() {
             }
         });
 
-        // Generate the next ID
         const nextNumber = maxNumber + 1;
         const nextId = `${STAFF_ID_PREFIX}${nextNumber.toString().padStart(3, '0')}`;
-
         document.getElementById('staffIdInput').value = nextId;
     } catch (error) {
         console.error('Error generating staff ID:', error);
-        // Fallback: let the user enter their own ID
     }
 }
 // Add this function to generate log codes
@@ -482,7 +600,7 @@ async function populateLogCodes() {
         console.error('Error generating log code:', error);
     }
 }
-// Delete staff
+// Delete staff - MODIFIED to use fetchWithAuth
 async function deleteStaff(staffId) {
     try {
         const result = await Swal.fire({
@@ -496,11 +614,9 @@ async function deleteStaff(staffId) {
         });
 
         if (result.isConfirmed) {
-            const response = await fetch(`${API_BASE_URL}/${staffId}`, {
+            await fetchWithAuth(`${API_BASE_URL}/${staffId}`, {
                 method: 'DELETE'
             });
-
-            if (!response.ok) throw new Error('Failed to delete staff');
 
             showSuccess('Staff deleted successfully');
             loadStaffData();
@@ -517,15 +633,42 @@ function closePopup() {
     staffFormPopup.classList.remove('active');
 }
 
-// Filter staff
-function filterStaff() {
+// Filter staff based on search input
+async function filterStaff() {
     const searchTerm = searchInput.value.toLowerCase();
-    const rows = staffTableBody.querySelectorAll('tr');
 
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
-    });
+    try {
+        showLoading(true);
+        const response = await fetchWithAuth(API_BASE_URL + '/all');
+        const allStaff = await response.json();
+
+        if (searchTerm === '') {
+            filteredStaffList = allStaff;
+        } else {
+            filteredStaffList = allStaff.filter(staff => {
+                const searchableText = `
+                    ${staff.staffId || ''} 
+                    ${staff.firstName || ''} 
+                    ${staff.lastName || ''} 
+                    ${staff.designation || ''} 
+                    ${staff.role || ''} 
+                    ${staff.gender || ''} 
+                    ${staff.contactNo || ''} 
+                    ${staff.email || ''}
+                `.toLowerCase();
+
+                return searchableText.includes(searchTerm);
+            });
+        }
+
+        currentPage = 1;
+        updatePagination();
+        showLoading(false);
+    } catch (error) {
+        console.error('Error filtering staff:', error);
+        showError('Failed to filter staff data');
+        showLoading(false);
+    }
 }
 
 // Update statistics
@@ -582,12 +725,10 @@ function showError(message) {
 
 // Generate Role Distribution Report
 function generateRoleReport() {
-    fetch(API_BASE_URL + '/all')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch staff data');
-            return response.json();
-        })
+    fetchWithAuth(API_BASE_URL + '/all')
+        .then(response => response.json())
         .then(staffList => {
+            // ... rest of the function remains the same
             const roleCounts = {};
             staffList.forEach(staff => {
                 const role = staff.role || 'OTHER';
@@ -678,12 +819,10 @@ function generateRoleReport() {
 
 // Generate Gender Distribution Report
 function generateGenderReport() {
-    fetch(API_BASE_URL + '/all')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch staff data');
-            return response.json();
-        })
+    fetchWithAuth(API_BASE_URL + '/all')
+        .then(response => response.json())
         .then(staffList => {
+            // ... rest of the function remains the same
             const genderCounts = {
                 MALE: 0,
                 FEMALE: 0,
@@ -698,6 +837,7 @@ function generateGenderReport() {
                     genderCounts.OTHER++;
                 }
             });
+
 
             // Create detailed report content
             document.getElementById('reportModalTitle').textContent = 'Gender Distribution Report';
@@ -788,13 +928,10 @@ function generateGenderReport() {
 
 // Generate Joining Trends Report
 function generateJoiningReport() {
-    fetch(API_BASE_URL + '/all')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to fetch staff data');
-            return response.json();
-        })
+    fetchWithAuth(API_BASE_URL + '/all')
+        .then(response => response.json())
         .then(staffList => {
-            // Group by year
+            // ... rest of the function remains the same
             const yearCounts = {};
             staffList.forEach(staff => {
                 if (staff.joinedDate) {
@@ -973,9 +1110,7 @@ loadStats();
 async function generateFullReport() {
     try {
         showLoading(true);
-        const response = await fetch(API_BASE_URL + '/all');
-        if (!response.ok) throw new Error('Failed to fetch staff data');
-
+        const response = await fetchWithAuth(API_BASE_URL + '/all');
         const staffList = await response.json();
 
         // Create report modal content
@@ -1264,6 +1399,7 @@ function filterByRole() {
         }
     });
 }
+
 // Export chart as image
 function exportChartAsImage() {
     const canvas = document.getElementById('reportChart');

@@ -1,10 +1,7 @@
 package com.shpms.silverharvestsystem.entity;
 
 import com.shpms.silverharvestsystem.Enum.Role;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,5 +22,6 @@ public class User implements SuperEntity{
     private String lastName;
     private String email;
     private String password;
+    @Enumerated(EnumType.STRING) // ✅ store enum as VARCHAR in DB
     private Role role;
 }

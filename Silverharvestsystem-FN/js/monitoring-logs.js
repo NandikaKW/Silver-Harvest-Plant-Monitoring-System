@@ -1,5 +1,63 @@
+// Add these variables at the top of your JS file
+let currentPage = 1;
+let pageSize = 10;
+let totalPages = 1;
+let totalRecords = 0;
 // Base API URL
 const API_BASE_URL = 'http://localhost:8080/api/v1/logs';
+
+// Get JWT token from localStorage
+function getAuthToken() {
+    return localStorage.getItem('jwtToken');
+}
+
+// Check if user is authenticated
+function checkAuth() {
+    const token = getAuthToken();
+    if (!token) {
+        // Redirect to login if no token found
+        window.location.href = 'index.html';
+        return false;
+    }
+    return true;
+}
+
+// Generic API request function with JWT
+async function apiRequest(url, options = {}) {
+    if (!checkAuth()) {
+        throw new Error('Not authenticated');
+    }
+
+    const token = getAuthToken();
+    const defaultOptions = {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            ...options.headers
+        }
+    };
+
+    const mergedOptions = { ...defaultOptions, ...options };
+
+    try {
+        const response = await fetch(url, mergedOptions);
+
+        // Check for unauthorized response
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('jwtToken');
+            window.location.href = 'index.html';
+            throw new Error('Authentication failed. Please login again.');
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response;
+    } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+    }
+}
 
 // DOM Elements
 const logForm = document.getElementById('logForm');
@@ -31,6 +89,56 @@ const reportPopup = document.getElementById('reportPopup');
 const reportDropdownBtn = document.getElementById('reportDropdownBtn');
 const reportDropdown = document.getElementById('reportDropdown');
 
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication on page load
+    if (!checkAuth()) {
+        return;
+    }
+
+    loadLogs();
+    updateStats();
+});
+
+// Add these event listeners
+document.getElementById('pageSizeSelect').addEventListener('change', function() {
+    pageSize = parseInt(this.value);
+    currentPage = 1;
+    displayLogs(currentLogs);
+    updatePagination();
+});
+
+document.getElementById('firstPageBtn').addEventListener('click', function() {
+    if (currentPage > 1) {
+        currentPage = 1;
+        displayLogs(currentLogs);
+        updatePagination();
+    }
+});
+
+document.getElementById('prevPageBtn').addEventListener('click', function() {
+    if (currentPage > 1) {
+        currentPage--;
+        displayLogs(currentLogs);
+        updatePagination();
+    }
+});
+
+document.getElementById('nextPageBtn').addEventListener('click', function() {
+    if (currentPage < totalPages) {
+        currentPage++;
+        displayLogs(currentLogs);
+        updatePagination();
+    }
+});
+
+document.getElementById('lastPageBtn').addEventListener('click', function() {
+    if (currentPage < totalPages) {
+        currentPage = totalPages;
+        displayLogs(currentLogs);
+        updatePagination();
+    }
+});
 // Store current filtered logs
 let currentLogs = [];
 
@@ -39,12 +147,26 @@ document.addEventListener('DOMContentLoaded', function() {
     loadLogs();
     updateStats();
 });
-
+// Initialize logout button on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setupLogout();
+});
 logForm.addEventListener('submit', handleFormSubmit);
 cancelBtn.addEventListener('click', resetForm);
 observedImageInput.addEventListener('change', previewImage);
-openFormBtn.addEventListener('click', function() {
+// Modify the openFormBtn event listener to auto-generate code
+openFormBtn.addEventListener('click', async function() {
     resetForm();
+
+    // Auto-generate the next log code
+    try {
+        const nextCode = await generateNextLogCode();
+        logCodeInput.value = nextCode;
+    } catch (error) {
+        console.error('Error generating log code:', error);
+        // If there's an error, leave the field empty for manual entry
+    }
+
     logFormPopup.classList.add('active');
 });
 closePopupBtn.addEventListener('click', function() {
@@ -103,15 +225,43 @@ function previewImage() {
         fileName.textContent = file.name;
     }
 }
+// Add this function to generate the next log code
+async function generateNextLogCode() {
+    try {
+        const response = await apiRequest(`${API_BASE_URL}/all`);
+        const logs = await response.json();
 
-// Load all logs
+        if (logs.length === 0) {
+            return "LOG001";
+        }
+
+        // Extract all log codes and find the highest number
+        const logCodes = logs.map(log => log.logCode);
+        const maxCode = logCodes.reduce((max, code) => {
+            if (code.startsWith("LOG")) {
+                const num = parseInt(code.substring(3));
+                return num > max ? num : max;
+            }
+            return max;
+        }, 0);
+
+        // Generate next code
+        const nextNum = maxCode + 1;
+        return `LOG${nextNum.toString().padStart(3, '0')}`;
+    } catch (error) {
+        console.error('Error generating log code:', error);
+        // Fallback to current time-based code if there's an error
+        return `LOG${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    }
+}
+
+// Update the loadLogs function to reset to page 1
 async function loadLogs() {
     try {
-        const response = await fetch(`${API_BASE_URL}/all`);
-        if (!response.ok) throw new Error('Failed to fetch logs');
-
+        const response = await apiRequest(`${API_BASE_URL}/all`);
         const logs = await response.json();
-        currentLogs = logs; // Store logs for reporting
+        currentLogs = logs;
+        currentPage = 1;
         displayLogs(logs);
         updateStats();
     } catch (error) {
@@ -125,65 +275,124 @@ async function loadLogs() {
     }
 }
 
-// Display logs in the UI
+// Update the displayLogs function to include pagination
 function displayLogs(logs) {
     logsTableBody.innerHTML = '';
     logsCards.innerHTML = '';
 
+    totalRecords = logs.length;
+    totalPages = Math.ceil(totalRecords / pageSize);
+
     if (logs.length === 0) {
         logsTableBody.innerHTML = '<tr><td colspan="5" class="text-center">No logs found.</td></tr>';
         logsCards.innerHTML = '<p class="text-center">No logs found.</p>';
+        updatePagination();
         return;
     }
 
-    // Update table view
-    logs.forEach(log => {
+    // Calculate the start and end index for the current page
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalRecords);
+    const paginatedLogs = logs.slice(startIndex, endIndex);
+
+    // Update the pagination info
+    document.getElementById('currentPageStart').textContent = startIndex + 1;
+    document.getElementById('currentPageEnd').textContent = endIndex;
+    document.getElementById('totalRecords').textContent = totalRecords;
+
+    // Update table view with paginated logs
+    paginatedLogs.forEach(log => {
         const tableRow = document.createElement('tr');
         tableRow.innerHTML = `
-      <td>${log.logCode}</td>
-      <td>${log.logDate}</td>
-      <td>${truncateText(log.logDetails, 50)}</td>
-      <td>${log.observedImage ? `<img src="data:image/jpeg;base64,${log.observedImage}" class="img-thumbnail" alt="Observed Image">` : 'No Image'}</td>
-      <td>
-        <div class="action-buttons">
-          <button class="action-btn view-btn" onclick="viewLogDetails('${log.logCode}')"><i class="fas fa-eye"></i></button>
-          <button class="action-btn edit-btn" onclick="editLog('${log.logCode}')"><i class="fas fa-edit"></i></button>
-          <button class="action-btn delete-btn" onclick="deleteLog('${log.logCode}')"><i class="fas fa-trash"></i></button>
-        </div>
-      </td>
-    `;
+            <td>${log.logCode}</td>
+            <td>${log.logDate}</td>
+            <td>${truncateText(log.logDetails, 50)}</td>
+            <td>${log.observedImage ? `<img src="data:image/jpeg;base64,${log.observedImage}" class="img-thumbnail" alt="Observed Image">` : 'No Image'}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn view-btn" onclick="viewLogDetails('${log.logCode}')"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn edit-btn" onclick="editLog('${log.logCode}')"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="deleteLog('${log.logCode}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        `;
         logsTableBody.appendChild(tableRow);
     });
 
-    // Update mobile card view
-    logs.forEach(log => {
+    // Update mobile card view with paginated logs
+    paginatedLogs.forEach(log => {
         const logCard = document.createElement('div');
         logCard.className = 'log-card';
         logCard.innerHTML = `
-      <div class="log-card-header">
-        <span><strong>${log.logCode}</strong></span>
-        <span class="badge bg-secondary">${log.logDate}</span>
-      </div>
-      <div class="log-card-body">
-        <p>${truncateText(log.logDetails, 100)}</p>
-        ${log.observedImage ? `<img src="data:image/jpeg;base64,${log.observedImage}" class="log-card-image" alt="Observed Image">` : ''}
-      </div>
-      <div class="log-card-actions">
-        <button class="action-btn view-btn" onclick="viewLogDetails('${log.logCode}')"><i class="fas fa-eye"></i></button>
-        <button class="action-btn edit-btn" onclick="editLog('${log.logCode}')"><i class="fas fa-edit"></i></button>
-        <button class="action-btn delete-btn" onclick="deleteLog('${log.logCode}')"><i class="fas fa-trash"></i></button>
-      </div>
-    `;
+            <div class="log-card-header">
+                <span><strong>${log.logCode}</strong></span>
+                <span class="badge bg-secondary">${log.logDate}</span>
+            </div>
+            <div class="log-card-body">
+                <p>${truncateText(log.logDetails, 100)}</p>
+                ${log.observedImage ? `<img src="data:image/jpeg;base64,${log.observedImage}" class="log-card-image" alt="Observed Image">` : ''}
+            </div>
+            <div class="log-card-actions">
+                <button class="action-btn view-btn" onclick="viewLogDetails('${log.logCode}')"><i class="fas fa-eye"></i></button>
+                <button class="action-btn edit-btn" onclick="editLog('${log.logCode}')"><i class="fas fa-edit"></i></button>
+                <button class="action-btn delete-btn" onclick="deleteLog('${log.logCode}')"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
         logsCards.appendChild(logCard);
     });
+
+    updatePagination();
 }
 
-// Update stats
+// Add this function to update pagination controls
+function updatePagination() {
+    const firstPageBtn = document.getElementById('firstPageBtn');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const lastPageBtn = document.getElementById('lastPageBtn');
+    const pageNumbers = document.getElementById('pageNumbers');
+
+    // Update button states
+    firstPageBtn.disabled = currentPage === 1;
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
+    lastPageBtn.disabled = currentPage === totalPages;
+
+    // Generate page numbers
+    pageNumbers.innerHTML = '';
+
+    // Show up to 5 page numbers around the current page
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    // Adjust if we're near the end
+    if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.textContent = i;
+        pageBtn.classList.toggle('active', i === currentPage);
+        pageBtn.addEventListener('click', () => {
+            currentPage = i;
+            displayLogs(currentLogs);
+            updatePagination();
+        });
+        pageNumbers.appendChild(pageBtn);
+    }
+
+    // Update pagination info
+    const startIndex = (currentPage - 1) * pageSize + 1;
+    const endIndex = Math.min(currentPage * pageSize, totalRecords);
+    document.getElementById('currentPageStart').textContent = startIndex;
+    document.getElementById('currentPageEnd').textContent = endIndex;
+    document.getElementById('totalRecords').textContent = totalRecords;
+}
+
 async function updateStats() {
     try {
-        const response = await fetch(`${API_BASE_URL}/all`);
-        if (!response.ok) throw new Error('Failed to fetch logs for stats');
-
+        const response = await apiRequest(`${API_BASE_URL}/all`);
         const logs = await response.json();
         const today = new Date().toISOString().split('T')[0];
 
@@ -195,9 +404,14 @@ async function updateStats() {
     }
 }
 
-// Handle form submission - MODIFIED to handle optional image in edits
+
+// Handle form submission with JWT
 async function handleFormSubmit(e) {
     e.preventDefault();
+
+    if (!checkAuth()) {
+        return;
+    }
 
     const formData = new FormData();
     formData.append('logCode', logCodeInput.value);
@@ -215,12 +429,11 @@ async function handleFormSubmit(e) {
     try {
         let response;
         if (isEdit) {
-            response = await fetch(`${API_BASE_URL}/${logId}`, {
+            response = await apiRequest(`${API_BASE_URL}/${logId}`, {
                 method: 'PUT',
                 body: formData
             });
         } else {
-            // For new entries, image is still required
             if (!observedImageInput.files[0]) {
                 Swal.fire({
                     icon: 'warning',
@@ -231,7 +444,7 @@ async function handleFormSubmit(e) {
             }
             formData.append('observedImage', observedImageInput.files[0]);
 
-            response = await fetch(API_BASE_URL, {
+            response = await apiRequest(API_BASE_URL, {
                 method: 'POST',
                 body: formData
             });
@@ -277,12 +490,9 @@ function resetForm() {
     observedImageInput.setAttribute('required', 'required');
 }
 
-// Edit log - MODIFIED to handle image as optional
 async function editLog(logCode) {
     try {
-        const response = await fetch(`${API_BASE_URL}/${logCode}`);
-        if (!response.ok) throw new Error('Failed to fetch log');
-
+        const response = await apiRequest(`${API_BASE_URL}/${logCode}`);
         const log = await response.json();
 
         // Fill form with log data
@@ -297,14 +507,12 @@ async function editLog(logCode) {
             imagePreview.style.display = 'block';
             fileInputLabel.classList.add('has-file');
             fileName.textContent = 'Existing image (optional to change)';
-
-            // Remove required attribute for edit mode
             observedImageInput.removeAttribute('required');
         }
 
         // Change form to edit mode
         popupTitle.textContent = 'Edit Log';
-        logCodeInput.disabled = true; // Disable code editing as it's the ID
+        logCodeInput.disabled = true; // Disable editing of log code
 
         // Show the popup
         logFormPopup.classList.add('active');
@@ -319,7 +527,7 @@ async function editLog(logCode) {
 }
 
 
-// Delete log
+// Delete log with JWT - Use the "/delete" endpoint
 async function deleteLog(logCode) {
     Swal.fire({
         title: 'Are you sure?',
@@ -332,7 +540,8 @@ async function deleteLog(logCode) {
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                const response = await fetch(`${API_BASE_URL}/delete/${logCode}`, {
+                // Use the "/delete" endpoint to match the controller
+                const response = await apiRequest(`${API_BASE_URL}/delete/${logCode}`, {
                     method: 'DELETE'
                 });
 
@@ -352,13 +561,16 @@ async function deleteLog(logCode) {
                 }
             } catch (error) {
                 console.error('Error deleting log:', error);
-                alert('Error deleting log: ' + error.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Deleting Log',
+                    text: error.message
+                });
             }
         }
     });
 }
-
-// Reset form to initial state
+// Update the resetForm function to clear the generated code
 function resetForm() {
     logForm.reset();
     logIdInput.value = '';
@@ -367,21 +579,26 @@ function resetForm() {
     imagePreview.style.display = 'none';
     fileInputLabel.classList.remove('has-file');
     fileName.textContent = 'No file chosen';
+
+    // Restore required attribute for new entries
+    observedImageInput.setAttribute('required', 'required');
+
+    // Clear the log code input when resetting the form
+    logCodeInput.value = '';
 }
 
-// Perform search function
+// Update the performSearch function to reset to page 1
 async function performSearch() {
     const searchTerm = searchInput.value.trim().toLowerCase();
 
     if (searchTerm === '') {
+        currentPage = 1;
         loadLogs();
         return;
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/all`);
-        if (!response.ok) throw new Error('Failed to fetch logs');
-
+        const response = await apiRequest(`${API_BASE_URL}/all`);
         const allLogs = await response.json();
         currentLogs = allLogs.filter(log =>
             log.logCode.toLowerCase().includes(searchTerm) ||
@@ -389,20 +606,23 @@ async function performSearch() {
             log.logDetails.toLowerCase().includes(searchTerm)
         );
 
+        currentPage = 1;
         displayLogs(currentLogs);
+        updatePagination();
     } catch (error) {
         console.error('Error searching logs:', error);
-        alert('Error searching logs: ' + error.message);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error Searching Logs',
+            text: error.message
+        });
     }
 }
 
-// View log details - FIXED FUNCTION
+// View log details with JWT
 async function viewLogDetails(logCode) {
     try {
-        // Fetch the specific log from the server to ensure we have the latest data
-        const response = await fetch(`${API_BASE_URL}/${logCode}`);
-        if (!response.ok) throw new Error('Failed to fetch log details');
-
+        const response = await apiRequest(`${API_BASE_URL}/${logCode}`);
         const log = await response.json();
 
         // Populate details popup
@@ -428,7 +648,6 @@ async function viewLogDetails(logCode) {
             detailActions.appendChild(reportBtn);
         }
 
-        // Update the onclick handler to use the correct log data
         reportBtn.onclick = () => generateSingleLogReport(log);
 
         // Show the popup
@@ -438,6 +657,23 @@ async function viewLogDetails(logCode) {
         alert('Error fetching log details: ' + error.message);
     }
 }
+
+function setupLogout() {
+    if (!document.getElementById('logoutBtn')) {
+        const headerActions = document.querySelector('.header-actions');
+        const logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logoutBtn';
+        logoutBtn.className = 'btn-secondary';
+        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+        logoutBtn.onclick = function() {
+            localStorage.removeItem('jwtToken');
+            // Force redirect to index.html in the whole browser
+            window.top.location.href = 'index.html';
+        };
+        headerActions.appendChild(logoutBtn);
+    }
+}
+
 
 // Generate report
 function generateReport(type) {
@@ -685,7 +921,6 @@ function getLatestDate(logs) {
 }
 
 // Generate individual log report
-// Generate individual log report
 function generateIndividualLogReport(log) {
     const reportDate = new Date().toLocaleDateString();
 
@@ -727,13 +962,10 @@ function generateIndividualLogReport(log) {
 `;
 }
 
-// Generate single log report - FIXED FUNCTION
+// Generate single log report
 async function generateSingleLogReport(log) {
     try {
-        // Fetch the latest data for this specific log from the server
-        const response = await fetch(`${API_BASE_URL}/${log.logCode}`);
-        if (!response.ok) throw new Error('Failed to fetch log for reporting');
-
+        const response = await apiRequest(`${API_BASE_URL}/${log.logCode}`);
         const freshLogData = await response.json();
 
         // Create report HTML for a single log
@@ -752,7 +984,11 @@ async function generateSingleLogReport(log) {
         reportPopup.classList.add('active');
     } catch (error) {
         console.error('Error generating single log report:', error);
-        alert('Error generating report: ' + error.message);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error Generating Report',
+            text: error.message
+        });
     }
 }
 

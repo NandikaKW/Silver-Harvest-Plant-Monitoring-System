@@ -161,6 +161,7 @@ body {
     cursor: not-allowed;
     opacity: 0.8;
 }
+
 /* Header Styles */
 .header {
     display: flex;

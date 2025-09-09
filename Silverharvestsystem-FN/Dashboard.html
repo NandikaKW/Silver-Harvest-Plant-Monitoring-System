@@ -89,8 +89,423 @@
         .modal-overlay.active {
             display: block;
         }
-    </style>
 
+        /* New Hero Section Styles */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 0 2rem;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .video-background iframe {
+            width: 100vw;
+            height: 56.25vw;
+            min-height: 100vh;
+            min-width: 177.77vh;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(136, 180, 78, 0.85) 0%, rgba(106, 142, 59, 0.85) 100%);
+            z-index: 2;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            color: white;
+            text-align: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .badge-icon {
+            background: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            color: #88B44E;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out 0.9s both;
+        }
+
+        .btn-primary-hero {
+            background: linear-gradient(135deg, #88B44E, #6a8e3b);
+            border: 2px solid #88B44E;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(113, 183, 230, 0.3);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary-hero:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .btn-primary-hero:hover:before {
+            left: 100%;
+        }
+
+        .btn-primary-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(113, 183, 230, 0.4);
+        }
+
+        .btn-secondary-hero {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-secondary-hero:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .btn-secondary-hero:hover:before {
+            left: 100%;
+        }
+
+        .btn-secondary-hero:hover {
+            background: white;
+            color: #88B44E;
+        }
+
+        /* Floating elements */
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 15%;
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 20s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 50px;
+            height: 50px;
+            top: 25%;
+            right: 15%;
+            animation-delay: 2s;
+            animation-duration: 18s;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 70px;
+            height: 70px;
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 4s;
+            animation-duration: 22s;
+        }
+
+        .floating-element:nth-child(4) {
+            width: 40px;
+            height: 40px;
+            bottom: 30%;
+            right: 10%;
+            animation-delay: 6s;
+            animation-duration: 16s;
+        }
+
+        /* Stats counter */
+        .stats-container-hero {
+            position: relative;
+            width: 100%;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 150px;
+            animation: fadeInUp 1s ease-out 1.2s both;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Notification toast */
+        .notification-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            z-index: 1001;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+        }
+
+        .notification-toast.show {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            margin-right: 0.75rem;
+            color: #88B44E;
+            font-size: 1.2rem;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #777;
+            margin-left: 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(10deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .stats-container-hero {
+                gap: 1rem;
+            }
+
+            .stat-item {
+                min-width: 120px;
+                padding: 0.75rem 1rem;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-primary-hero, .btn-secondary-hero {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 1rem;
+            }
+
+            .video-background iframe {
+                min-width: 100vw;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            .stats-container-hero {
+                margin-top: 2rem;
+                padding: 0 1rem;
+            }
+
+            .stat-item {
+                min-width: calc(50% - 1rem);
+            }
+
+            .floating-element {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .stat-item {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
 <nav>
@@ -146,261 +561,99 @@
     <div class="top">
         <i class="uil uil-bars sidebar-toggle"></i>
 
-        <div class="search-box">
-            <i class="uil uil-search"></i>
-            <input type="text" placeholder="Search crops, fields...">
-        </div>
+<!--        <div class="search-box">-->
+<!--            <i class="uil uil-search"></i>-->
+<!--            <input type="text" placeholder="Search crops, fields...">-->
+<!--        </div>-->
 
         <div class="profile">
-            <img src="images/Plant-logo.png" alt="User">
+            <img src="images/Plant-logo-01.png" alt="User">
             <span class="username">Farm Manager</span>
         </div>
     </div>
 
     <!-- DASH CONTENT WRAPPER -->
     <div class="dash-content" id="main-dashboard">
+        <!-- New Hero Section -->
+        <section class="hero" id="home">
+            <div class="video-background">
+                <iframe
+                        src="https://www.youtube.com/embed/fSAciqEl9X4?autoplay=1&mute=1&loop=1&playlist=fSAciqEl9X4&controls=0&modestbranding=1&rel=0&showinfo=0"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media"
+                        allowfullscreen>
+                </iframe>
+                <div class="video-overlay"></div>
+            </div>
 
-        <!-- Default Overview Section -->
-        <!-- Header -->
-        <div class="dashboard-header fade-in">
-            <h1 style="color: black;">
-                <i class="fas fa-tractor"></i> Silver Harvest Dashboard
-            </h1>
-            <div class="header-actions">
-                <a href="crop.html" class="btn-primary" style="color: black;">
-                    <i class="fas fa-seedling"></i> Crop Management
-                </a>
-                <a href="Field.html" class="btn-primary"  style="color: black;">
-                    <i class="fas fa-tractor"></i> Field Management
-                </a>
-                <a href="Monitoring-logs.html" class="btn-primary" style="color: black;">
-                    <i class="fas fa-clipboard-list"></i> Monitoring Logs
-                </a>
+            <!-- Floating elements -->
+            <div class="floating-elements">
+                <div class="floating-element"></div>
+                <div class="floating-element"></div>
+                <div class="floating-element"></div>
+                <div class="floating-element"></div>
             </div>
-        </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-container fade-in">
-            <div class="stat-card" style="animation-delay: 0.1s;">
-                <div class="stat-icon">
-                    <i class="fas fa-seedling"></i>
-                </div>
-                <div class="stat-info">
-                    <h4>Total Crops</h4>
-                    <p id="totalCrops">24</p>
-                </div>
-            </div>
-            <div class="stat-card" style="animation-delay: 0.2s;">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--secondary-color), #4daa7f);">
-                    <i class="fas fa-map-marked-alt"></i>
-                </div>
-                <div class="stat-info">
-                    <h4>Active Fields</h4>
-                    <p id="activeFields">8</p>
-                </div>
-            </div>
-            <div class="stat-card" style="animation-delay: 0.3s;">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--accent-color), #f39c12);">
-                    <i class="fas fa-clipboard-check"></i>
-                </div>
-                <div class="stat-info">
-                    <h4>Monitoring Logs</h4>
-                    <p id="totalLogs">42</p>
-                </div>
-            </div>
-            <div class="stat-card" style="animation-delay: 0.4s;">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">
-                    <i class="fas fa-cloud-sun"></i>
-                </div>
-                <div class="stat-info">
-                    <h4>Current Season</h4>
-                    <p id="currentSeason">Spring</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Dashboard Grid -->
-        <div class="dashboard-grid">
-            <!-- Chart Section -->
-            <div class="chart-section fade-in" style="animation-delay: 0.5s;">
-                <div class="chart-header">
-                    <h3><i class="fas fa-chart-line"></i> Crop Production Overview</h3>
-                    <div class="chart-actions">
-                        <select class="form-select" style="width: auto; display: inline-block; padding: 0.5rem; border-radius: 8px; border: 1px solid var(--border-color);">
-                            <option>Last 7 Days</option>
-                            <option selected>Last 30 Days</option>
-                            <option>Last 90 Days</option>
-                        </select>
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <div class="badge-icon">
+                        <i class="fas fa-leaf"></i>
                     </div>
+                    <span>Smart Plantation Monitoring</span>
                 </div>
-                <div class="chart-container">
-                    <canvas id="productionChart"></canvas>
-                </div>
-            </div>
+                <h1 class="hero-title">Revolutionize Your Farming with Advanced Technology</h1>
+                <p class="hero-subtitle">Monitor crops, optimize resources, and increase yields with our cutting-edge plantation monitoring system designed for modern agriculture.</p>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions fade-in" style="animation-delay: 0.6s;">
-                <div class="actions-header">
-                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                <!-- Buttons placed above the stats cards -->
+                <div class="hero-buttons">
+                    <button class="btn-primary-hero" onclick="window.location.href='index.html'">
+                        <i class="fas fa-play-circle"></i> Watch Demo
+                    </button>
+                    <button class="btn-secondary-hero" id="consultationBtn">
+                        <i class="fas fa-calendar"></i> Schedule Consultation
+                    </button>
                 </div>
-                <div class="action-list">
-                    <a href="crop.html" class="action-item">
-                        <div class="action-icon">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <div class="action-text">
-                            <h4>Add New Crop</h4>
-                            <p>Register a new crop in the system</p>
-                        </div>
-                    </a>
-                    <a href="Field.html" class="action-item">
-                        <div class="action-icon" style="background: linear-gradient(135deg, var(--secondary-color), #4daa7f);">
-                            <i class="fas fa-map-marked-alt"></i>
-                        </div>
-                        <div class="action-text">
-                            <h4>Manage Fields</h4>
-                            <p>View and edit field information</p>
-                        </div>
-                    </a>
-                    <a href="Monitoring-logs.html" class="action-item">
-                        <div class="action-icon" style="background: linear-gradient(135deg, var(--accent-color), #f39c12);">
-                            <i class="fas fa-clipboard-list"></i>
-                        </div>
-                        <div class="action-text">
-                            <h4>Create Log Entry</h4>
-                            <p>Record field observations</p>
-                        </div>
-                    </a>
-                    <a href="vehicle.html" class="action-item">
-                        <div class="action-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">
-                            <i class="fas fa-truck"></i>
-                        </div>
-                        <div class="action-text">
-                            <h4>Vehicle Details</h4>
-                            <p>Manage vehicle information</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
 
-            <!-- Recent Activity -->
-<!--            <div class="recent-activity fade-in" style="animation-delay: 0.7s;">-->
-<!--                <div class="activity-header">-->
-<!--                    <h3><i class="fas fa-history"></i> Recent Activity</h3>-->
-<!--                    <a href="#" class="btn-secondary">View All</a>-->
-<!--                </div>-->
-<!--                <div class="activity-list">-->
-<!--                    <div class="activity-item">-->
-<!--                        <div class="activity-icon">-->
-<!--                            <i class="fas fa-seedling"></i>-->
-<!--                        </div>-->
-<!--                        <div class="activity-content">-->
-<!--                            <h4>New Crop Added</h4>-->
-<!--                            <p>Corn (Zea mays) was added to Field B-12</p>-->
-<!--                            <div class="activity-time">2 hours ago</div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="activity-item">-->
-<!--                        <div class="activity-icon" style="background: linear-gradient(135deg, var(&#45;&#45;secondary-color), #4daa7f);">-->
-<!--                            <i class="fas fa-tractor"></i>-->
-<!--                        </div>-->
-<!--                        <div class="activity-content">-->
-<!--                            <h4>Field Updated</h4>-->
-<!--                            <p>Field A-05 irrigation system was serviced</p>-->
-<!--                            <div class="activity-time">5 hours ago</div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="activity-item">-->
-<!--                        <div class="activity-icon" style="background: linear-gradient(135deg, var(&#45;&#45;accent-color), #f39c12);">-->
-<!--                            <i class="fas fa-clipboard-list"></i>-->
-<!--                        </div>-->
-<!--                        <div class="activity-content">-->
-<!--                            <h4>Monitoring Log Created</h4>-->
-<!--                            <p>Pest observation recorded in Field C-08</p>-->
-<!--                            <div class="activity-time">Yesterday</div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="activity-item">-->
-<!--                        <div class="activity-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">-->
-<!--                            <i class="fas fa-cloud-sun"></i>-->
-<!--                        </div>-->
-<!--                        <div class="activity-content">-->
-<!--                            <h4>Weather Alert</h4>-->
-<!--                            <p>Rain forecasted for tomorrow - irrigation adjusted</p>-->
-<!--                            <div class="activity-time">2 days ago</div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-            <!-- System Status -->
-            <div class="system-status fade-in" style="animation-delay: 0.8s;">
-                <div class="status-header">
-                    <h3><i class="fas fa-server"></i> System Status</h3>
-                </div>
-                <div class="status-list">
-                    <div class="status-item">
-                        <div class="status-info">
-                            <div class="status-icon">
-                                <i class="fas fa-seedling"></i>
-                            </div>
-                            <div class="status-text">
-                                <h4>Crop Management</h4>
-                                <p>All systems operational</p>
-                            </div>
-                        </div>
-                        <span class="status-indicator status-online">Online</span>
+                <!-- Stats counter -->
+                <div class="stats-container-hero">
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="500">0</div>
+                        <div class="stat-label">Farms Monitored</div>
                     </div>
-                    <div class="status-item">
-                        <div class="status-info">
-                            <div class="status-icon" style="background: linear-gradient(135deg, var(--secondary-color), #4daa7f);">
-                                <i class="fas fa-tractor"></i>
-                            </div>
-                            <div class="status-text">
-                                <h4>Field Management</h4>
-                                <p>Processing data</p>
-                            </div>
-                        </div>
-                        <span class="status-indicator status-online">Online</span>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="98">0</div>
+                        <div class="stat-label">Success Rate</div>
                     </div>
-                    <div class="status-item">
-                        <div class="status-info">
-                            <div class="status-icon" style="background: linear-gradient(135deg, var(--accent-color), #f39c12);">
-                                <i class="fas fa-clipboard-list"></i>
-                            </div>
-                            <div class="status-text">
-                                <h4>Monitoring Logs</h4>
-                                <p>Sync in progress</p>
-                            </div>
-                        </div>
-                        <span class="status-indicator status-online">Online</span>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="24">0</div>
+                        <div class="stat-label">Support Hours</div>
                     </div>
-                    <div class="status-item">
-                        <div class="status-info">
-                            <div class="status-icon" style="background: linear-gradient(135deg, #3498db, #2ecc71);">
-                                <i class="fas fa-cloud"></i>
-                            </div>
-                            <div class="status-text">
-                                <h4>Weather API</h4>
-                                <p>Updated 15 min ago</p>
-                            </div>
-                        </div>
-                        <span class="status-indicator status-online">Online</span>
+                    <div class="stat-item">
+                        <div class="stat-number" data-count="1500">0</div>
+                        <div class="stat-label">Happy Farmers</div>
                     </div>
                 </div>
             </div>
-
-        </div>
-
-        <!-- Footer -->
-        <div class="dashboard-footer fade-in">
-            <p>© 2023 Silver Harvest | Modern Agriculture Solutions</p>
-        </div>
+        </section>
 
         <!-- Hidden iframe initially -->
         <iframe id="content-frame" src="" frameborder="0" style="width:100%; height:80vh; display:none;"></iframe>
     </div>
 </section>
+
+<!-- Notification Toast -->
+<div class="notification-toast" id="notificationToast">
+    <div class="notification-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="notification-content">
+        <div class="notification-title">Welcome to Silver Harvest</div>
+        <div class="notification-message">Discover how our technology can transform your farming operations.</div>
+    </div>
+    <button class="notification-close" id="closeNotification">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
 
 <!-- Add this modal container after the dashboard section -->
 <div id="page-modal" class="page-modal">
@@ -414,6 +667,147 @@
         <iframe id="modal-frame" src="" frameborder="0"></iframe>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const role = localStorage.getItem("userRole");
+
+        // Mapping role -> allowed sections
+        const roleAccess = {
+            "MANAGER": ["crop", "equipment", "field", "order", "orderdetail", "staff", "vehicle", "log-view"],
+            "ADMINISTRATIVE": ["order", "orderdetail", "cart", "staff", "vehicle","crop"],
+            "SCIENTIST": ["crop", "field", "log-full", "equipment"],
+            "OTHER": ["cart", "log-view", "vehicle-view"]
+        };
+
+        const allowed = roleAccess[role] || [];
+
+        // Hide menu items that are not allowed
+        document.querySelectorAll(".nav-links li a").forEach(link => {
+            const page = link.getAttribute("data-page");
+            const name = link.querySelector(".link-name").textContent.toLowerCase();
+
+            // Normalize to check
+            let key = "";
+            if (name.includes("log")) key = role === "SCIENTIST" ? "log-full" : "log-view";
+            else if (name.includes("vehicle")) key = role === "OTHER" ? "vehicle-view" : "vehicle";
+            else key = name.split(" ")[0]; // crop, field, equipment, etc.
+
+            if (!allowed.includes(key)) {
+                link.parentElement.style.display = "none"; // hide item
+            }
+        });
+
+        // Show notification toast after page load
+        setTimeout(function() {
+            document.getElementById('notificationToast').classList.add('show');
+        }, 2000);
+
+        // Close notification
+        document.getElementById('closeNotification').addEventListener('click', function() {
+            document.getElementById('notificationToast').classList.remove('show');
+        });
+
+        // Consultation button interaction
+        document.getElementById('consultationBtn').addEventListener('click', function() {
+            // Create a ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            this.appendChild(ripple);
+
+            // Remove the ripple after animation completes
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+
+            // Show a confirmation message
+            const toast = document.getElementById('notificationToast');
+            toast.querySelector('.notification-icon').innerHTML = '<i class="fas fa-calendar-check"></i>';
+            toast.querySelector('.notification-title').textContent = 'Consultation Scheduled';
+            toast.querySelector('.notification-message').textContent = 'We will contact you shortly to confirm your appointment.';
+            toast.classList.add('show');
+
+            // Hide the toast after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        });
+
+        // Animated counter for stats
+        function animateCounter() {
+            const counters = document.querySelectorAll('.stat-number');
+            const speed = 200; // The lower the slower
+
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-count');
+                const count = +counter.innerText;
+                const increment = Math.ceil(target / speed);
+
+                if (count < target) {
+                    counter.innerText = Math.min(count + increment, target);
+                    setTimeout(() => animateCounter(), 1);
+                }
+            });
+        }
+
+        // Start counter animation when stats are in viewport
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        observer.observe(document.querySelector('.stats-container-hero'));
+
+        // Add ripple effect to buttons
+        const buttons = document.querySelectorAll('.btn-primary-hero, .btn-secondary-hero');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const x = e.clientX - e.target.getBoundingClientRect().left;
+                const y = e.clientY - e.target.getBoundingClientRect().top;
+
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple-effect');
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+
+                this.appendChild(ripple);
+
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+
+        // Add CSS for ripple effect
+        const style = document.createElement('style');
+        style.textContent = `
+            .ripple-effect {
+                position: absolute;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.4);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                width: 20px;
+                height: 20px;
+                margin-top: -10px;
+                margin-left: -10px;
+                pointer-events: none;
+            }
+
+            @keyframes ripple {
+                to {
+                    transform: scale(10);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

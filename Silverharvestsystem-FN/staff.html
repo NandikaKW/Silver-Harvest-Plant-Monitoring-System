@@ -103,6 +103,35 @@
                 </tbody>
             </table>
         </div>
+        <!-- Add this after the table, before the loading spinner -->
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="currentPageStart">0</span>-<span id="currentPageEnd">0</span> of <span id="totalRecords">0</span> records
+            </div>
+            <div class="pagination-controls">
+                <button class="btn-icon" id="firstPageBtn" title="First Page">
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="btn-icon" id="prevPageBtn" title="Previous Page">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="btn-icon" id="nextPageBtn" title="Next Page">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="btn-icon" id="lastPageBtn" title="Last Page">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+                <select id="pageSizeSelect" class="page-size-select">
+                    <option value="5">5 per page</option>
+                    <option value="10" selected>10 per page</option>
+                    <option value="20">20 per page</option>
+                    <option value="50">50 per page</option>
+                </select>
+            </div>
+        </div>
         <div id="loadingSpinner" class="spinner" style="display: none;"></div>
     </div>
 

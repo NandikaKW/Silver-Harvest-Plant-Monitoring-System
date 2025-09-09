@@ -142,7 +142,12 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="vehicleCodeInput"><i class="fas fa-barcode"></i> Vehicle Code</label>
-                        <input type="text" id="vehicleCodeInput" name="vehicleCode" required>
+                        <div class="input-with-button">
+                            <input type="text" id="vehicleCodeInput" name="vehicleCode" required readonly>
+                            <button type="button" id="generateVehicleIdBtn" class="btn-generate">
+                                <i class="fas fa-sync-alt"></i> Generate ID
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">

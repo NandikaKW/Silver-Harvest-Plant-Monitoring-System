@@ -236,6 +236,14 @@ body {
 .input-with-button button:hover {
     background: var(--primary-dark);
 }
+.custom-report-popup {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.swal2-popup.swal2-toast .swal2-icon {
+    border-color: transparent;
+}
 /* Header Styles */
 .header {
     display: flex;

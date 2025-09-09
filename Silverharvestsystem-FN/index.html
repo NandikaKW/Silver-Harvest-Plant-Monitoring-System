@@ -881,7 +881,7 @@
                     <a href="#testimonials" class="nav-item nav-link">Testimonials</a>
                     <a href="#contact" class="nav-item nav-link">Contact</a>
                     <a href="orders.html" class="nav-item nav-link">My Orders</a>
-                    <a href="SignIn.html" class="nav-item nav-link">Sign In</a>
+                    <a href="Signup.html" class="nav-item nav-link">Sign Up</a>
                 </div>
                 <div class="border-start ps-4 d-none d-lg-block">
                     <button type="button" class="btn btn-sm p-0"><i class="fa fa-search"></i></button>
@@ -1252,7 +1252,14 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="form-floating">
-                        <input type="text" id="userId" class="form-control" placeholder="User ID" required>
+                        <select id="userId" class="form-select" required>
+                            <option value="">Select User ID</option>
+                            <option value="U001">U001</option>
+                            <option value="U002">U002</option>
+                            <option value="U003">U003</option>
+                            <option value="U004">U004</option>
+                            <option value="U005">U005</option>
+                        </select>
                         <label for="userId"><i class="fas fa-user text-primary"></i> User ID</label>
                     </div>
                 </div>
@@ -1354,14 +1361,137 @@
 <script>
     const API_BASE = "http://localhost:8080/api/v1/cart";
 
+    // Function to get JWT token from storage
+    function getToken() {
+        return localStorage.getItem('jwtToken');
+    }
+
+    // Function to check if user is authenticated
+    function checkAuth() {
+        const token = getToken();
+        if (!token) {
+            alert('Please login first');
+            window.location.href = 'SignIn.html';
+            return false;
+        }
+
+        // Check if token is expired
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.exp * 1000 < Date.now()) {
+                alert('Session expired. Please login again.');
+                localStorage.removeItem('jwtToken');
+                window.location.href = 'SignIn.html';
+                return false;
+            }
+        } catch (e) {
+            console.error('Token parsing error:', e);
+            localStorage.removeItem('jwtToken');
+            window.location.href = 'SignIn.html';
+            return false;
+        }
+
+        return true;
+    }
+    // Call this on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (checkAuth()) {
+            debugJWT();
+        }
+    });
+    // Add this JavaScript code to handle the dropdown change events
+    document.addEventListener('DOMContentLoaded', function() {
+        const userIdSelect = document.getElementById('userId');
+
+        // Auto-load cart when user ID is selected
+        userIdSelect.addEventListener('change', function() {
+            if (this.value) {
+                loadCart(this.value);
+            }
+        });
+
+        // Check if user is logged in on page load
+        if (!checkAuth()) return;
+
+        // Auto-load cart if userId already has a value (from page load)
+        if (userIdSelect.value) {
+            loadCart(userIdSelect.value);
+        }
+    });
+
+    // Add this error handling wrapper to all your fetch calls
+    async function authenticatedFetch(url, options = {}) {
+        if (!checkAuth()) return null;
+
+        const token = getToken();
+        const defaultOptions = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        };
+
+        const mergedOptions = { ...defaultOptions, ...options };
+
+        try {
+            const response = await fetch(url, mergedOptions);
+
+            if (response.status === 401 || response.status === 403) {
+                alert("Session expired. Please login again.");
+                localStorage.removeItem('jwtToken');
+                window.location.href = 'SignIn.html';
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            return response;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
+        }
+    }
+    // Debug function to check what's in the JWT token
+    function debugJWT() {
+        const token = getToken();
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('JWT Payload:', payload);
+                console.log('Role from token:', payload.role);
+                console.log('Role type:', typeof payload.role);
+
+                // Check what exact string is in the role
+                console.log('Role string length:', payload.role.length);
+                console.log('Role char codes:');
+                for (let i = 0; i < payload.role.length; i++) {
+                    console.log(`  ${i}: '${payload.role[i]}' (${payload.role.charCodeAt(i)})`);
+                }
+
+                return payload.role;
+            } catch (e) {
+                console.error('Error parsing token:', e);
+            }
+        }
+        return null;
+    }
     // Handle Add to Cart with animation
     document.getElementById("cartForm").addEventListener("submit", async (e) => {
         e.preventDefault();
+
+        if (!checkAuth()) return;
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const userRole = payload.role; // Extract role from token
 
         const cartData = {
             userId: document.getElementById("userId").value,
             cropCode: document.getElementById("cropCode").value,
             quantity: parseInt(document.getElementById("quantity").value),
+            role: userRole // Use the role from token
         };
 
         // Create flying item animation
@@ -1372,8 +1502,8 @@
         const flyingItem = document.createElement('div');
         flyingItem.className = 'flying-item';
         flyingItem.innerHTML = '<i class="fas fa-leaf"></i>';
-        flyingItem.style.left = `${buttonRect.left + buttonRect.width/2 - 30}px`; // Center the item
-        flyingItem.style.top = `${buttonRect.top + buttonRect.height/2 - 30}px`; // Center the item
+        flyingItem.style.left = `${buttonRect.left + buttonRect.width/2 - 30}px`;
+        flyingItem.style.top = `${buttonRect.top + buttonRect.height/2 - 30}px`;
         document.body.appendChild(flyingItem);
 
         // Get target position (cart icon in nav)
@@ -1389,13 +1519,12 @@
         }, 10);
 
         try {
-            const res = await fetch(API_BASE, {
+            const response = await authenticatedFetch(API_BASE, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(cartData),
             });
 
-            if (res.ok) {
+            if (response) {
                 // Complete animation and remove element
                 setTimeout(() => {
                     flyingItem.style.opacity = '0';
@@ -1420,7 +1549,6 @@
                 document.getElementById("cropCode").value = "";
                 document.getElementById("quantity").value = "1";
             } else {
-                alert("Error adding to cart");
                 document.body.removeChild(flyingItem);
             }
         } catch (err) {
@@ -1431,10 +1559,12 @@
 
     // Function to update cart badge count
     async function updateCartBadge(userId) {
+        if (!checkAuth()) return;
+
         try {
-            const res = await fetch(`${API_BASE}/user/${userId}`);
-            if (res.ok) {
-                const items = await res.json();
+            const response = await authenticatedFetch(`${API_BASE}/user/${userId}`);
+            if (response) {
+                const items = await response.json();
                 document.getElementById('cartBadge').textContent = items.length;
             }
         } catch (err) {
@@ -1444,11 +1574,14 @@
 
     // Update the loadCart function to also update the badge count
     async function loadCart(userId) {
-        try {
-            const res = await fetch(`${API_BASE}/user/${userId}`);
-            if (!res.ok) throw new Error("Failed to load cart");
+        if (!checkAuth()) return;
 
-            const items = await res.json();
+        try {
+            const response = await authenticatedFetch(`${API_BASE}/user/${userId}`);
+
+            if (!response) return;
+
+            const items = await response.json();
             const cartBody = document.getElementById("cartBody");
 
             // Update cart badge
@@ -1456,16 +1589,16 @@
 
             if (items.length === 0) {
                 cartBody.innerHTML = `
-            <tr>
-              <td colspan="5">
-                <div class="empty-cart">
-                  <i class="fas fa-shopping-cart"></i>
-                  <h4 class="text-muted">Your cart is empty</h4>
-                  <p>Add some products to your cart from our store</p>
-                </div>
-              </td>
-            </tr>
-          `;
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h4 class="text-muted">Your cart is empty</h4>
+                                <p>Add some products to your cart from our store</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 updateCartSummary(0);
                 return;
             }
@@ -1480,32 +1613,32 @@
                 subtotal += itemTotal;
 
                 cartBody.innerHTML += `
-            <tr>
-              <td data-label="Product">
-                <div class="d-flex align-items-center">
-                  <div class="ms-3">
-                    <h6 class="mb-0">${item.cropName}</h6>
-                    <small class="text-muted">Code: ${item.cropCode}</small>
-                  </div>
-                </div>
-              </td>
-              <td data-label="Image" class="text-center">
-                ${item.cropImage
+                    <tr>
+                        <td data-label="Product">
+                            <div class="d-flex align-items-center">
+                                <div class="ms-3">
+                                    <h6 class="mb-0">${item.cropName || 'Product'}</h6>
+                                    <small class="text-muted">Code: ${item.cropCode}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Image" class="text-center">
+                            ${item.cropImage
                     ? `<img src="data:image/png;base64,${item.cropImage}" alt="${item.cropName}" class="cart-item-image">`
                     : '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;"><i class="fas fa-image text-muted"></i></div>'}
-              </td>
-              <td data-label="Quantity" class="text-center">
-                <input type="number" class="quantity-input" value="${item.quantity}" min="1"
-                  onchange="updateCartItem('${item.cartId}', this.value, '${item.userId}')">
-              </td>
-              <td data-label="Price" class="text-center">$${itemTotal.toFixed(2)}</td>
-              <td data-label="Actions" class="text-center">
-                <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart('${item.cartId}', '${item.userId}')">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          `;
+                        </td>
+                        <td data-label="Quantity" class="text-center">
+                            <input type="number" class="quantity-input" value="${item.quantity}" min="1"
+                                onchange="updateCartItem('${item.cartId}', this.value, '${item.userId}')">
+                        </td>
+                        <td data-label="Price" class="text-center">$${itemTotal.toFixed(2)}</td>
+                        <td data-label="Actions" class="text-center">
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart('${item.cartId}', '${item.userId}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
             });
 
             updateCartSummary(subtotal);
@@ -1528,15 +1661,17 @@
 
     // Update Cart Item Quantity
     async function updateCartItem(cartId, quantity, userId) {
+        if (!checkAuth()) return;
+
         try {
-            const res = await fetch(`${API_BASE}/${cartId}?quantity=${quantity}`, {
+            const response = await authenticatedFetch(`${API_BASE}/${cartId}?quantity=${quantity}`, {
                 method: "PUT"
             });
 
-            if (!res.ok) {
-                alert("Error updating item");
-            } else {
+            if (response) {
                 loadCart(userId);
+            } else {
+                alert("Error updating item");
             }
         } catch (err) {
             console.error(err);
@@ -1545,11 +1680,16 @@
 
     // Remove Item
     async function removeFromCart(cartId, userId) {
+        if (!checkAuth()) return;
+
         if (!confirm("Are you sure you want to remove this item from your cart?")) return;
 
         try {
-            const res = await fetch(`${API_BASE}/${cartId}`, { method: "DELETE" });
-            if (res.ok) {
+            const response = await authenticatedFetch(`${API_BASE}/${cartId}`, {
+                method: "DELETE"
+            });
+
+            if (response) {
                 loadCart(userId);
             } else {
                 alert("Error removing item");
@@ -1564,22 +1704,27 @@
         const userId = document.getElementById("userId").value;
         if (!userId) return alert("Enter User ID first");
 
+        if (!checkAuth()) return;
+
         if (!confirm("Are you sure you want to clear your entire cart?")) return;
 
         try {
-            const res = await fetch(`${API_BASE}/user/${userId}`, { method: "DELETE" });
-            if (res.ok) {
+            const response = await authenticatedFetch(`${API_BASE}/user/${userId}`, {
+                method: "DELETE"
+            });
+
+            if (response) {
                 document.getElementById("cartBody").innerHTML = `
-            <tr>
-              <td colspan="5">
-                <div class="empty-cart">
-                  <i class="fas fa-shopping-cart"></i>
-                  <h4 class="text-muted">Your cart is empty</h4>
-                  <p>Add some products to your cart from our store</p>
-                </div>
-              </td>
-            </tr>
-          `;
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h4 class="text-muted">Your cart is empty</h4>
+                                <p>Add some products to your cart from our store</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
                 updateCartSummary(0);
             } else {
                 alert("Error clearing cart");
@@ -1588,81 +1733,6 @@
             console.error(err);
         }
     }
-
-    // Checkout Popup Functionality
-    const checkoutBtn = document.getElementById("checkoutBtn");
-    const closeCheckoutBtn = document.getElementById("closeCheckoutBtn");
-    const cancelCheckoutBtn = document.getElementById("cancelCheckoutBtn");
-    const checkoutPopup = document.getElementById("checkoutPopup");
-    const checkoutForm = document.getElementById("checkoutForm");
-
-    checkoutBtn.addEventListener("click", () => {
-        const userId = document.getElementById("userId").value;
-        if (!userId) {
-            alert("Please enter your User ID first");
-            return;
-        }
-        // Redirect to order.html with userId as query param (optional)
-        window.location.href = `orders.html?userId=${encodeURIComponent(userId)}`;
-    });
-
-    // closeCheckoutBtn.addEventListener("click", closeCheckout);
-    // cancelCheckoutBtn.addEventListener("click", closeCheckout);
-    //
-    // function closeCheckout() {
-    //     checkoutPopup.classList.remove("active");
-    //     document.body.style.overflow = "auto";
-    // }
-    //
-    // // Close when clicking outside the form
-    // checkoutPopup.addEventListener("click", (e) => {
-    //     if (e.target === checkoutPopup) {
-    //         closeCheckout();
-    //     }
-    // });
-
-    // // Form submission
-    // checkoutForm.addEventListener("submit", (e) => {
-    //     e.preventDefault();
-    //
-    //     // Get form values
-    //     const fullName = document.getElementById("fullName").value;
-    //     const email = document.getElementById("email").value;
-    //     const phone = document.getElementById("phone").value;
-    //     const address = document.getElementById("address").value;
-    //     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    //     const cardNumber = document.getElementById("cardNumber").value;
-    //     const expiryDate = document.getElementById("expiryDate").value;
-    //     const cvv = document.getElementById("cvv").value;
-    //
-    //     // Here you would typically send the data to a server
-    //     console.log({
-    //         fullName,
-    //         email,
-    //         phone,
-    //         address,
-    //         paymentMethod,
-    //         cardNumber,
-    //         expiryDate,
-    //         cvv
-    //     });
-    //
-    //     // Show success message
-    //     alert('Order placed successfully!');
-    //     checkoutForm.reset();
-    //     closeCheckout();
-    //
-    //     // In a real application, you would clear the cart after successful purchase
-    //     // clearCart();
-    // });
-
-    // Auto-load cart when page loads (if userId field has a value)
-    window.onload = () => {
-        const userId = document.getElementById("userId").value;
-        if (userId) {
-            loadCart(userId);
-        }
-    };
 </script>
 <!-- Store End -->
 

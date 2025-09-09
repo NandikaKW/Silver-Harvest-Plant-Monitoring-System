@@ -1,6 +1,36 @@
 // API Base URL
 const API_BASE = 'http://localhost:8080/api/v1/vehicle';
 
+
+// JWT Token management
+let jwtToken = localStorage.getItem('jwtToken');
+
+// Function to set JWT token
+function setJwtToken(token) {
+    jwtToken = token;
+    localStorage.setItem('jwtToken', token);
+}
+
+// Function to get auth headers
+function getAuthHeaders() {
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`
+    };
+}
+
+// Check if token exists on page load
+document.addEventListener('DOMContentLoaded', () => {
+    if (!jwtToken) {
+        // Redirect to login if no token
+        window.location.href = 'login.html';
+        return;
+    }
+    loadVehicles();
+    setupEventListeners();
+});
+
+
 // DOM Elements
 const vehicleTableBody = document.getElementById('vehicleTableBody');
 const vehicleForm = document.getElementById('vehicleForm');
@@ -46,13 +76,25 @@ function setupEventListeners() {
     document.querySelector('.close-view-popup').addEventListener('click', () => {
         viewVehiclePopup.classList.remove('active');
     });
+    document.getElementById('generateVehicleIdBtn').addEventListener('click', generateNextVehicleId);
+
+
 }
 
-// API Functions
+// Modified API Functions with JWT
 async function loadVehicles() {
     showLoading(true);
     try {
-        const response = await fetch(`${API_BASE}/getAll`);
+        const response = await fetch(`${API_BASE}/getAll`, {
+            headers: getAuthHeaders()
+        });
+
+        if (response.status === 401) {
+            // Token expired or invalid
+            handleUnauthorized();
+            return;
+        }
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -66,16 +108,60 @@ async function loadVehicles() {
         showLoading(false);
     }
 }
+// Function to generate the next vehicle ID
+async function generateNextVehicleId() {
+    try {
+        const response = await fetch(`${API_BASE}/getAll`, {
+            headers: getAuthHeaders()
+        });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const vehicles = await response.json();
+
+        // Find the highest existing vehicle code
+        let maxNumber = 0;
+        vehicles.forEach(vehicle => {
+            if (vehicle.vehicleCode && vehicle.vehicleCode.startsWith('V')) {
+                const numberPart = parseInt(vehicle.vehicleCode.substring(1));
+                if (!isNaN(numberPart) && numberPart > maxNumber) {
+                    maxNumber = numberPart;
+                }
+            }
+        });
+
+        // Generate the next ID
+        const nextNumber = maxNumber + 1;
+        const nextId = 'V' + nextNumber.toString().padStart(3, '0');
+
+        // Set the value in the input field
+        document.getElementById('vehicleCodeInput').value = nextId;
+
+    } catch (error) {
+        console.error('Error generating vehicle ID:', error);
+        showError('Failed to generate vehicle ID');
+    }
+}
 
 async function saveVehicle(vehicleData) {
     try {
         const response = await fetch(`${API_BASE}/save`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(vehicleData)
         });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
 
         if (response.ok) {
             showSuccess('Vehicle saved successfully');
@@ -95,11 +181,14 @@ async function updateVehicle(vehicleCode, vehicleData) {
     try {
         const response = await fetch(`${API_BASE}/update/${vehicleCode}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: getAuthHeaders(),
             body: JSON.stringify(vehicleData)
         });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
 
         if (response.ok) {
             showSuccess('Vehicle updated successfully');
@@ -129,8 +218,14 @@ async function deleteVehicle(vehicleCode) {
     if (result.isConfirmed) {
         try {
             const response = await fetch(`${API_BASE}/delete/${vehicleCode}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: getAuthHeaders()
             });
+
+            if (response.status === 401) {
+                handleUnauthorized();
+                return;
+            }
 
             if (response.ok) {
                 showSuccess('Vehicle deleted successfully');
@@ -148,7 +243,15 @@ async function deleteVehicle(vehicleCode) {
 
 async function getVehicleDetails(vehicleCode) {
     try {
-        const response = await fetch(`${API_BASE}/${vehicleCode}`);
+        const response = await fetch(`${API_BASE}/${vehicleCode}`, {
+            headers: getAuthHeaders()
+        });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -159,7 +262,14 @@ async function getVehicleDetails(vehicleCode) {
         console.error('Error:', error);
     }
 }
-
+// Handle unauthorized access
+function handleUnauthorized() {
+    showError('Your session has expired. Please login again.');
+    localStorage.removeItem('jwtToken');
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 2000);
+}
 // UI Functions
 function renderVehicles(vehicles) {
     vehicleTableBody.innerHTML = '';
@@ -242,19 +352,31 @@ function updateStats(vehicles) {
     maintenanceVehiclesEl.textContent = maintenanceCount;
 }
 
+// Auto-generate ID when opening the add form
 function openAddForm() {
     editMode.value = 'false';
     popupTitle.textContent = 'Add New Vehicle';
     vehicleForm.reset();
+    generateNextVehicleId(); // Auto-generate ID
     vehicleFormPopup.classList.add('active');
 }
 
+// Don't auto-generate when editing
 async function openEditForm(vehicleCode) {
     try {
-        const response = await fetch(`${API_BASE}/${vehicleCode}`);
+        const response = await fetch(`${API_BASE}/${vehicleCode}`, {
+            headers: getAuthHeaders()
+        });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            return;
+        }
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         const vehicle = await response.json();
 
         editMode.value = 'true';
@@ -267,7 +389,10 @@ async function openEditForm(vehicleCode) {
         document.getElementById('categoryInput').value = vehicle.vehicleCategory;
         document.getElementById('fuelTypeInput').value = vehicle.fuelType;
         document.getElementById('statusInput').value = vehicle.status;
-        document.getElementById('staffIdInput').value = vehicle.staffId;
+
+        // Set the staff ID in the dropdown
+        const staffDropdown = document.getElementById('staffIdInput');
+        staffDropdown.value = vehicle.staffId;
 
         vehicleFormPopup.classList.add('active');
     } catch (error) {
@@ -438,36 +563,99 @@ function exportData() {
 }
 
 function printTable() {
+    // Get all visible rows (after filtering)
+    const visibleRows = Array.from(vehicleTableBody.querySelectorAll('tr'))
+        .filter(row => row.style.display !== 'none');
+
+    if (visibleRows.length === 0) {
+        showError('No data to print');
+        return;
+    }
+
+    // Create table HTML for printing
+    let tableHTML = `
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Vehicle Code</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">License Plate</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Category</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Fuel Type</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Status</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left; background-color: #f2f2f2;">Staff ID</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    // Add rows
+    visibleRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        tableHTML += `
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">${cells[0].textContent}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${cells[1].textContent}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${cells[2].textContent}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${cells[3].textContent}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${cells[4].textContent}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${cells[5].textContent}</td>
+            </tr>
+        `;
+    });
+
+    tableHTML += `
+            </tbody>
+        </table>
+    `;
+
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
-            <html>
-            <head>
-                <title>Vehicle Management System - Report</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    table { width: 100%; border-collapse: collapse; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f2f2f2; }
-                    h1 { color: #2c3e50; }
-                    .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; }
-                    .status-active { background-color: #d4edda; color: #155724; }
-                    .status-inactive { background-color: #f8d7da; color: #721c24; }
-                    .status-maintenance { background-color: #fff3cd; color: #856404; }
-                </style>
-            </head>
-            <body>
-                <h1>Vehicle Management System - Report</h1>
+        <html>
+        <head>
+            <title>Vehicle Management System - Report</title>
+            <style>
+                body { 
+                    font-family: Arial, sans-serif; 
+                    margin: 20px; 
+                    color: #333;
+                }
+                h1 { 
+                    color: #2c3e50; 
+                    text-align: center;
+                    margin-bottom: 10px;
+                }
+                .report-info {
+                    text-align: center;
+                    margin-bottom: 20px;
+                    color: #666;
+                }
+                .summary {
+                    margin: 20px 0;
+                    padding: 15px;
+                    background-color: #f9f9f9;
+                    border-left: 4px solid #667eea;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Vehicle Management System - Report</h1>
+            <div class="report-info">
                 <p>Generated on: ${new Date().toLocaleString()}</p>
-                ${document.querySelector('.table-responsive').innerHTML}
-            </body>
-            </html>
-        `);
+                <p>Total Records: ${visibleRows.length}</p>
+            </div>
+            ${tableHTML}
+            <script>
+                window.onload = function() {
+                    window.print();
+                    setTimeout(function() {
+                        window.close();
+                    }, 100);
+                }
+            </script>
+        </body>
+        </html>
+    `);
     printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-    }, 250);
 }
 
 function toggleFilterOptions() {
@@ -573,8 +761,16 @@ function generateFullReport() {
 }
 
 function generateStatusReport() {
-    fetch(`${API_BASE}/getAll`)
-        .then(response => response.json())
+    fetch(`${API_BASE}/getAll`, {
+        headers: getAuthHeaders()
+    })
+        .then(response => {
+            if (response.status === 401) {
+                handleUnauthorized();
+                return Promise.reject('Unauthorized');
+            }
+            return response.json();
+        })
         .then(vehicles => {
             // Count vehicles by status
             const statusCounts = {
@@ -602,14 +798,24 @@ function generateStatusReport() {
             showReportModal('Status Distribution Report', 'pie', labels, data, backgroundColors);
         })
         .catch(error => {
-            console.error('Error:', error);
-            showError('Failed to generate status report');
+            if (error !== 'Unauthorized') {
+                console.error('Error:', error);
+                showError('Failed to generate status report');
+            }
         });
 }
 
 function generateCategoryReport() {
-    fetch(`${API_BASE}/getAll`)
-        .then(response => response.json())
+    fetch(`${API_BASE}/getAll`, {
+        headers: getAuthHeaders()
+    })
+        .then(response => {
+            if (response.status === 401) {
+                handleUnauthorized();
+                return Promise.reject('Unauthorized');
+            }
+            return response.json();
+        })
         .then(vehicles => {
             // Count vehicles by category
             const categoryCounts = {};
@@ -630,14 +836,24 @@ function generateCategoryReport() {
             showReportModal('Category Analysis Report', 'bar', labels, data, backgroundColors);
         })
         .catch(error => {
-            console.error('Error:', error);
-            showError('Failed to generate category report');
+            if (error !== 'Unauthorized') {
+                console.error('Error:', error);
+                showError('Failed to generate category report');
+            }
         });
 }
 
 function generateFuelTypeReport() {
-    fetch(`${API_BASE}/getAll`)
-        .then(response => response.json())
+    fetch(`${API_BASE}/getAll`, {
+        headers: getAuthHeaders()
+    })
+        .then(response => {
+            if (response.status === 401) {
+                handleUnauthorized();
+                return Promise.reject('Unauthorized');
+            }
+            return response.json();
+        })
         .then(vehicles => {
             // Count vehicles by fuel type
             const fuelTypeCounts = {};
@@ -658,8 +874,10 @@ function generateFuelTypeReport() {
             showReportModal('Fuel Type Analysis Report', 'doughnut', labels, data, backgroundColors);
         })
         .catch(error => {
-            console.error('Error:', error);
-            showError('Failed to generate fuel type report');
+            if (error !== 'Unauthorized') {
+                console.error('Error:', error);
+                showError('Failed to generate fuel type report');
+            }
         });
 }
 
@@ -678,8 +896,16 @@ function generateFullReport() {
     });
 
     // Fetch data and generate report
-    fetch(`${API_BASE}/getAll`)
-        .then(response => response.json())
+    fetch(`${API_BASE}/getAll`, {
+        headers: getAuthHeaders()
+    })
+        .then(response => {
+            if (response.status === 401) {
+                handleUnauthorized();
+                return Promise.reject('Unauthorized');
+            }
+            return response.json();
+        })
         .then(vehicles => {
             Swal.close();
 
@@ -697,34 +923,34 @@ function generateFullReport() {
 
             // Create container for multiple charts
             reportContent.innerHTML = `
-        <div class="row">
-          <div class="col-md-6">
-            <div class="chart-container">
-              <canvas id="statusChart"></canvas>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="fuelChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="staffChart"></canvas>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="chart-container">
-              <canvas id="categoryChart"></canvas>
+            <div class="report-summary mt-4">
+                <h4>Report Summary</h4>
+                <p>Generated on: ${new Date().toLocaleString()}</p>
+                <p>Total Vehicles: ${vehicles.length}</p>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="chart-container">
-              <canvas id="fuelChart"></canvas>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="chart-container">
-              <canvas id="staffChart"></canvas>
-            </div>
-          </div>
-        </div>
-        <div class="report-summary mt-4">
-          <h4>Report Summary</h4>
-          <p>Generated on: ${new Date().toLocaleString()}</p>
-          <p>Total Vehicles: ${vehicles.length}</p>
-        </div>
-      `;
+        `;
 
             // Generate status chart
             const statusCounts = countByProperty(vehicles, 'status');
@@ -760,9 +986,11 @@ function generateFullReport() {
             document.getElementById('exportPdfBtn').onclick = () => exportReportAsPdf(vehicles);
         })
         .catch(error => {
-            console.error('Error:', error);
-            Swal.close();
-            showError('Failed to generate full report');
+            if (error !== 'Unauthorized') {
+                console.error('Error:', error);
+                Swal.close();
+                showError('Failed to generate full report');
+            }
         });
 }
 

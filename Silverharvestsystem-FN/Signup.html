@@ -4,6 +4,106 @@
     <meta charset="UTF-8">
     <title>Silver Harvest | Sign Up</title>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap");
+
+        /* Success Popup Styles */
+        .success-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .success-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .success-content {
+            background: rgba(0, 0, 0, .85);
+            border-radius: 8px;
+            padding: 40px;
+            width: 400px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #95B736;
+            position: relative;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background-color: #95B736;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: #000;
+        }
+
+        .success-content h2 {
+            color: #95B736;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .success-content p {
+            color: #b3b3b3;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .success-button {
+            padding: 12px 24px;
+            background: #95B736;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .success-button:hover {
+            background: #568712;
+            transform: translateY(-2px);
+        }
+
+        .countdown {
+            margin-top: 15px;
+            color: #8c8c8c;
+            font-size: 0.9rem;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="form-wrapper">
@@ -32,17 +132,63 @@
         <button type="submit">Sign Up</button>
     </form>
 
-    <p class="form-footer">Already have an account? <a href="index.html">Sign in now</a></p>
+    <p class="form-footer">Already have an account? <a href="SignIn.html">Sign in now</a></p>
     <small>
         This page is protected by Google reCAPTCHA to ensure you're not a bot.
         <a href="#">Learn more.</a>
     </small>
 </div>
+
+<!-- Success Popup -->
+<div class="success-popup" id="successPopup">
+    <div class="success-content">
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path>
+            </svg>
+        </div>
+        <h2 id="popupTitle">Success!</h2>
+        <p id="popupMessage">Your action was completed successfully.</p>
+        <button class="success-button" id="continueButton">Continue</button>
+        <div class="countdown" id="countdown">Redirecting in 5 seconds...</div>
+    </div>
+</div>
+
 <script>
+    // Function to show success popup
+    function showSuccessPopup(title, message, redirectUrl, delay = 5000) {
+        const popup = document.getElementById('successPopup');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupMessage = document.getElementById('popupMessage');
+        const continueButton = document.getElementById('continueButton');
+        const countdownElement = document.getElementById('countdown');
+
+        popupTitle.textContent = title;
+        popupMessage.textContent = message;
+        popup.classList.add('active');
+
+        let secondsLeft = delay / 1000;
+        countdownElement.textContent = `Redirecting in ${secondsLeft} seconds...`;
+
+        const countdownInterval = setInterval(() => {
+            secondsLeft--;
+            countdownElement.textContent = `Redirecting in ${secondsLeft} seconds...`;
+
+            if (secondsLeft <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+
+        continueButton.onclick = () => {
+            clearInterval(countdownInterval);
+            window.location.href = redirectUrl;
+        };
+    }
+
     document.getElementById("signupForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // Validate passwords match
         const password = e.target.elements.password.value;
         const confirmPassword = e.target.elements.confirmPassword.value;
 
@@ -52,16 +198,16 @@
         }
 
         const data = {
-            userId: Date.now().toString(), // simple ID
+            userId: Date.now().toString(),
             firstName: e.target.elements.firstName.value,
             lastName: e.target.elements.lastName.value,
             email: e.target.elements.email.value,
             password: password,
-            role: "USER"
+            role: "OTHER"
         };
 
         try {
-            const response = await fetch("http://localhost:8080/api/v1/user/signup", {
+            const response = await fetch("http://localhost:8080/auth/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -70,8 +216,13 @@
             });
 
             if (response.ok) {
-                alert("Sign up successful!");
-                window.location.href = "index.html"; // redirect to login
+                // Redirect to SignIn.html after signup
+                showSuccessPopup(
+                    "Registration Successful",
+                    "Your account has been created successfully. Redirecting to Sign In...",
+                    "SignIn.html",
+                    5000
+                );
             } else {
                 const error = await response.text();
                 alert("Error signing up: " + error);
@@ -81,5 +232,6 @@
         }
     });
 </script>
+
 </body>
 </html>
