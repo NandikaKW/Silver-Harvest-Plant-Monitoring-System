@@ -468,7 +468,7 @@ $(document).ready(function() {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
+            cancelButtonColor: '#020202',
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
@@ -1012,7 +1012,7 @@ $(document).ready(function() {
                     series: [{
                         name: 'Equipment Count',
                         data: data,
-                        color: '#6c5ce7'
+                        color: '#3498db'
                     }]
                 });
 

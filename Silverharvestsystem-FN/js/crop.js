@@ -45,7 +45,7 @@ async function makeAuthenticatedRequest(url, options = {}) {
         }
     };
 
-    // For FormData, let the browser set the Content-Type automatically
+    //  let the browser set the Content-Type automatically
     if (options.body instanceof FormData) {
         delete mergedOptions.headers['Content-Type'];
     }
@@ -680,9 +680,11 @@ $(document).ready(function() {
             title: 'Are you sure?',
             text: `You are about to delete crop ${cropCode}. This action cannot be undone.`,
             icon: 'warning',
+            background: '#ffffff', // White background
+            color: '#000000', // Black text
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#88B44E', // Green confirm button
+            cancelButtonColor: '#000000', // Black cancel button
             confirmButtonText: 'Yes, delete it!',
             cancelButtonText: 'Cancel'
         }).then(async (result) => {

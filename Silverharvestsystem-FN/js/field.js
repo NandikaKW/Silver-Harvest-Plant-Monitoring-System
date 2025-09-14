@@ -568,11 +568,14 @@ async function deleteField(fieldCode) {
         title: 'Are you sure?',
         text: "You won't be able to revert this!",
         icon: 'warning',
+        background: '#ffffff', // White background
+        color: '#000000', // Black text
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#1e8449', // Green confirm button
+        cancelButtonColor: '#000000', // Black cancel button
         confirmButtonText: 'Yes, delete it!'
     });
+
 
     if (!result.isConfirmed) return;
 

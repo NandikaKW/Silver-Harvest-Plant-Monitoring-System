@@ -10,6 +10,146 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/front.css">
     <style>
+        /* Consultation Modal */
+        .consultation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .consultation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .consultation-card {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .consultation-modal.active .consultation-card {
+            transform: translateY(0);
+        }
+
+        .consultation-header {
+            background: linear-gradient(135deg, #88B44E, #6a8e3b);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .consultation-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .consultation-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .consultation-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .consultation-body {
+            padding: 1.5rem;
+        }
+
+        .consultation-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .info-item i {
+            background: #88B44E;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .info-item h4 {
+            margin: 0 0 0.2rem 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .info-item p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .consultation-cta {
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+        }
+
+        .consultation-cta p {
+            margin-bottom: 1.2rem;
+            color: #666;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #88B44E, #6a8e3b);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(136, 180, 78, 0.4);
+        }
         /* Page Modal Styles */
         .page-modal {
             position: fixed;
@@ -655,6 +795,56 @@
     </button>
 </div>
 
+<!-- Consultation modal after the notification toast -->
+<div class="consultation-modal" id="consultationModal">
+    <div class="consultation-card">
+        <div class="consultation-header">
+            <h3>Schedule a Consultation</h3>
+            <button class="consultation-close" id="closeConsultation">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="consultation-body">
+            <div class="consultation-info">
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <h4>Duration</h4>
+                        <p>30-45 minutes session</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-video"></i>
+                    <div>
+                        <h4>Format</h4>
+                        <p>Video call or in-person</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <div>
+                        <h4>Availability</h4>
+                        <p>Monday - Friday, 9AM - 5PM</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-user-tie"></i>
+                    <div>
+                        <h4>Consultant</h4>
+                        <p>Our agricultural experts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="consultation-cta">
+                <p>We'll Send you a message to schedule a call</p>
+                <button class="btn-confirm" id="confirmConsultation">
+                  <i class="fas fa-paper-plane"></i> Request to Send  a Message
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Add this modal container after the dashboard section -->
 <div id="page-modal" class="page-modal">
     <div class="modal-header">
@@ -667,7 +857,12 @@
         <iframe id="modal-frame" src="" frameborder="0"></iframe>
     </div>
 </div>
-
+<script>
+    document.getElementById("confirmConsultation").addEventListener("click", function () {
+        // Scroll to the #contact section
+        window.location.href = "index.html#contact";
+    });
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const role = localStorage.getItem("userRole");
@@ -808,7 +1003,45 @@
         document.head.appendChild(style);
     });
 </script>
+<!-- Add this JavaScript to your existing script -->
+<script>
+    // Consultation modal functionality
+    const consultationBtn = document.getElementById('consultationBtn');
+    const consultationModal = document.getElementById('consultationModal');
+    const closeConsultation = document.getElementById('closeConsultation');
+    const confirmConsultation = document.getElementById('confirmConsultation');
 
+    consultationBtn.addEventListener('click', function() {
+        consultationModal.classList.add('active');
+    });
+
+    closeConsultation.addEventListener('click', function() {
+        consultationModal.classList.remove('active');
+    });
+
+    confirmConsultation.addEventListener('click', function() {
+        consultationModal.classList.remove('active');
+
+        // Show confirmation notification
+        const toast = document.getElementById('notificationToast');
+        toast.querySelector('.notification-icon').innerHTML = '<i class="fas fa-calendar-check"></i>';
+        toast.querySelector('.notification-title').textContent = 'Consultation Requested';
+        toast.querySelector('.notification-message').textContent = 'We will contact you within 24 hours to schedule your appointment.';
+        toast.classList.add('show');
+
+        // Hide the toast after 5 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 5000);
+    });
+
+    // Close modal when clicking outside
+    consultationModal.addEventListener('click', function(e) {
+        if (e.target === consultationModal) {
+            consultationModal.classList.remove('active');
+        }
+    });
+</script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="js/dashboard.js"></script>

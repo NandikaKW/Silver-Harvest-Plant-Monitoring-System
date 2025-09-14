@@ -796,6 +796,7 @@ function generateRoleReport() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                         legend: {
                             position: 'bottom'
@@ -904,13 +905,14 @@ function generateGenderReport() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    backgroundColor: '#ffffff',
                     plugins: {
                         legend: {
                             position: 'bottom'
                         },
                         title: {
                             display: true,
-                            text: 'Staff Gender Distribution'
+                            text: 'Staff Role Distribution'
                         }
                     }
                 }
@@ -1031,6 +1033,7 @@ function generateJoiningReport() {
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        backgroundColor: '#ffffff',
                         plugins: {
                             legend: {
                                 position: 'bottom'
@@ -1237,6 +1240,7 @@ async function generateFullReport() {
             },
             options: {
                 responsive: true,
+                backgroundColor: '#ffffff',
                 plugins: {
                     title: {
                         display: true,
@@ -1400,12 +1404,28 @@ function filterByRole() {
     });
 }
 
-// Export chart as image
+// Export chart as image with white background
 function exportChartAsImage() {
     const canvas = document.getElementById('reportChart');
     if (!canvas) return;
 
-    const image = canvas.toDataURL('image/png');
+    // Create a temporary canvas with white background
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Set dimensions
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+
+    // Fill with white background
+    tempCtx.fillStyle = 'white';
+    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // Draw the original chart on top of white background
+    tempCtx.drawImage(canvas, 0, 0);
+
+    // Export the temporary canvas
+    const image = tempCanvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.href = image;
     link.download = 'staff_report_chart.png';

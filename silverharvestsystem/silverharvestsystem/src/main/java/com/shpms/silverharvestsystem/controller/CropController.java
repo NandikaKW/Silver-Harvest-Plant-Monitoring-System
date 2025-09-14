@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,17 +24,20 @@ public class CropController {
     private final CropService cropService;
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMINISTRATIVE') or hasRole('SCIENTIST')")
     public ResponseEntity<List<CropDTO>> getAllCrops() {
         return ResponseEntity.ok(cropService.getAllCrops());
     }
 
     @GetMapping("/{cropCode}")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMINISTRATIVE') or hasRole('SCIENTIST')")
     public ResponseEntity<CropDTO> getCropById(@PathVariable String cropCode) {
         return ResponseEntity.ok(cropService.getCropById(cropCode));
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMINISTRATIVE') or hasRole('SCIENTIST')")
     public ResponseEntity<Void> saveCrop(@RequestParam("cropCode") String cropCode,
                                          @RequestParam("commonName") String commonName,
                                          @RequestParam("scientificName") String scientificName,
@@ -73,6 +77,7 @@ public class CropController {
 
 
     @PutMapping(value = "/{cropId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMINISTRATIVE') or hasRole('SCIENTIST')")
     public ResponseEntity<Void> updateCrop(
             @PathVariable("cropId") String cropId,
             @RequestParam("commonName") String commonName,
@@ -112,6 +117,7 @@ public class CropController {
 
 
     @DeleteMapping("/{cropCode}")
+    @PreAuthorize("hasRole('MANAGER') or hasRole('ADMINISTRATIVE') or hasRole('SCIENTIST')")
     public ResponseEntity<String> deleteCrop(@PathVariable String cropCode) {
         cropService.deleteCrop(cropCode);
         return ResponseEntity.ok("Crop deleted successfully");

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +26,7 @@ public class FieldController {
     private final FieldService fieldService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('SCIENTIST')")
     public ResponseEntity<Void> saveField(
             @RequestParam("fieldCode") String fieldCode,
             @RequestParam("fieldName") String fieldName,
@@ -73,12 +75,14 @@ public class FieldController {
     }
 
     @GetMapping("/{fieldCode}")
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('SCIENTIST')")
     public ResponseEntity<FieldDto> getField(@PathVariable String fieldCode) {
         FieldDto fieldDto = fieldService.getFieldById(fieldCode);
         return ResponseEntity.ok(fieldDto);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('SCIENTIST')")
     public ResponseEntity<List<FieldDto>> getAllFields() {
         List<FieldDto> fields = fieldService.getAllFields();
         return ResponseEntity.ok(fields);
@@ -86,6 +90,7 @@ public class FieldController {
 
     @PutMapping(value = "/{fieldCode}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('SCIENTIST')")
     public ResponseEntity<Void> updateField(
             @PathVariable String fieldCode, // ✅ This should be @PathVariable, not @RequestParam
             @RequestParam("fieldName") String fieldName,
@@ -128,6 +133,7 @@ public class FieldController {
 
 
     @DeleteMapping("/{fieldCode}")
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('SCIENTIST')")
     public ResponseEntity<Void> deleteField(@PathVariable String fieldCode) {
         fieldService.deleteField(fieldCode);
         return ResponseEntity.noContent().build();

@@ -90,6 +90,36 @@
                 </tbody>
             </table>
         </div>
+        <!-- Add this after the table-responsive div -->
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="currentItems">0</span> of <span id="totalItems">0</span> vehicles
+            </div>
+            <div class="pagination-controls">
+                <button class="btn-icon" id="firstPageBtn" disabled>
+                    <i class="fas fa-angle-double-left"></i>
+                </button>
+                <button class="btn-icon" id="prevPageBtn" disabled>
+                    <i class="fas fa-angle-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers"></div>
+                <button class="btn-icon" id="nextPageBtn" disabled>
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <button class="btn-icon" id="lastPageBtn" disabled>
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+            </div>
+            <div class="pagination-size">
+                <label for="itemsPerPage">Items per page:</label>
+                <select id="itemsPerPage">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
         <div id="loadingSpinner" class="spinner" style="display: none;"></div>
     </div>
 
@@ -192,7 +222,10 @@
 
                     <div class="form-group">
                         <label for="staffIdInput"><i class="fas fa-user"></i> Staff ID</label>
-                        <input type="text" id="staffIdInput" name="staffId" required>
+                        <select id="staffIdInput" name="staffId" required>
+                            <option value="">Select Staff ID</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
                     </div>
                 </div>
 

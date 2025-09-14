@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +27,7 @@ public class MonitorLogController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('OTHER')or hasRole('SCIENTIST')")
     public ResponseEntity<Void> saveLogs( @RequestParam("logCode") String logCode,
                                           @RequestParam("logDate") String logDate,
                                           @RequestParam("logDetails") String logDetails,
@@ -61,16 +63,19 @@ public class MonitorLogController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('OTHER') or hasRole('SCIENTIST')")
     public ResponseEntity<List<MoniteringLogDto>> getAllLogs() {
         return ResponseEntity.ok(monitoringLogService.getAllLogs());
     }
 
     @GetMapping("/{logCode}")
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('OTHER') or hasRole('SCIENTIST')")
     public ResponseEntity<MoniteringLogDto> getLogById(@PathVariable String logCode) {
         return ResponseEntity.ok(monitoringLogService.getLogById(logCode));
     }
     @PutMapping(value = "/{logID}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('OTHER')or hasRole('SCIENTIST')")
     public ResponseEntity<Void> updatedLogs(@PathVariable("logID") String logID,
                                             @RequestParam("logDate") String logDate,
                                             @RequestParam("logDetails") String logDetails,
@@ -105,6 +110,7 @@ public class MonitorLogController {
         }
     }
     @DeleteMapping("/delete/{logCode}")
+    @PreAuthorize("hasRole('MANAGER')  or hasRole('OTHER')or hasRole('SCIENTIST')")
     public ResponseEntity<String> deleteLog(@PathVariable String logCode) {
         monitoringLogService.deleteLog(logCode);
         return ResponseEntity.ok("Monitoring Log deleted successfully");

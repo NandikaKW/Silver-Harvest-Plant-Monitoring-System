@@ -1,3 +1,9 @@
+// Pagination Variables
+let currentPage = 1;
+let itemsPerPage = 10;
+let totalPages = 1;
+let allVehicles = [];
+let filteredVehicles = [];
 // API Base URL
 const API_BASE = 'http://localhost:8080/api/v1/vehicle';
 
@@ -18,6 +24,51 @@ function getAuthHeaders() {
         'Authorization': `Bearer ${jwtToken}`
     };
 }
+// Function to generate staff IDs
+async function generateStaffIds() {
+    try {
+        // In a real application, you would fetch existing staff from an API
+        // For this example, we'll generate sample staff IDs
+        const staffIds = [];
+        for (let i = 1; i <= 20; i++) {
+            staffIds.push(`S${i.toString().padStart(3, '0')}`);
+        }
+        return staffIds;
+    } catch (error) {
+        console.error('Error generating staff IDs:', error);
+        return [];
+    }
+}
+
+// Function to populate staff dropdown
+async function populateStaffDropdown() {
+    const staffDropdown = document.getElementById('staffIdInput');
+    const staffIds = await generateStaffIds();
+
+    // Clear existing options except the first one
+    while (staffDropdown.options.length > 1) {
+        staffDropdown.remove(1);
+    }
+
+    // Add staff IDs to dropdown
+    staffIds.forEach(staffId => {
+        const option = document.createElement('option');
+        option.value = staffId;
+        option.textContent = staffId;
+        staffDropdown.appendChild(option);
+    });
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    if (!jwtToken) {
+        window.location.href = 'login.html';
+        return;
+    }
+    loadVehicles();
+    setupEventListeners();
+    populateStaffDropdown(); // Add this line
+});
 
 // Check if token exists on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -72,16 +123,91 @@ function setupEventListeners() {
     filterBtn.addEventListener('click', toggleFilterOptions);
     generateReportBtn.addEventListener('click', generateFullReport);
 
+    // Pagination event listeners
+    document.getElementById('firstPageBtn').addEventListener('click', () => goToPage(1));
+    document.getElementById('prevPageBtn').addEventListener('click', () => goToPage(currentPage - 1));
+    document.getElementById('nextPageBtn').addEventListener('click', () => goToPage(currentPage + 1));
+    document.getElementById('lastPageBtn').addEventListener('click', () => goToPage(totalPages));
+    document.getElementById('itemsPerPage').addEventListener('change', changeItemsPerPage);
+
     // Close view popup
     document.querySelector('.close-view-popup').addEventListener('click', () => {
         viewVehiclePopup.classList.remove('active');
     });
     document.getElementById('generateVehicleIdBtn').addEventListener('click', generateNextVehicleId);
+}
+function updatePagination() {
+    // Calculate total pages
+    totalPages = Math.ceil(filteredVehicles.length / itemsPerPage);
 
+    // Ensure current page is within valid range
+    if (currentPage > totalPages) {
+        currentPage = totalPages > 0 ? totalPages : 1;
+    }
 
+    // Update pagination controls
+    updatePaginationControls();
+
+    // Update displayed items info
+    updatePaginationInfo();
+}
+function updatePaginationControls() {
+    const firstPageBtn = document.getElementById('firstPageBtn');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const lastPageBtn = document.getElementById('lastPageBtn');
+    const pageNumbers = document.getElementById('pageNumbers');
+
+    // Enable/disable navigation buttons
+    firstPageBtn.disabled = currentPage === 1;
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages;
+    lastPageBtn.disabled = currentPage === totalPages;
+
+    // Generate page number buttons
+    pageNumbers.innerHTML = '';
+
+    // Show up to 5 page buttons with current page in the middle
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + 4);
+
+    // Adjust if we're near the end
+    if (endPage - startPage < 4) {
+        startPage = Math.max(1, endPage - 4);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.addEventListener('click', () => goToPage(i));
+        pageNumbers.appendChild(pageBtn);
+    }
 }
 
-// Modified API Functions with JWT
+function updatePaginationInfo() {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredVehicles.length);
+
+    document.getElementById('currentItems').textContent =
+        filteredVehicles.length > 0 ? `${startIndex + 1}-${endIndex}` : '0';
+    document.getElementById('totalItems').textContent = filteredVehicles.length;
+}
+function goToPage(page) {
+    if (page < 1 || page > totalPages) return;
+
+    currentPage = page;
+    renderVehicles();
+    updatePaginationControls();
+    updatePaginationInfo();
+}
+
+function changeItemsPerPage() {
+    itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
+    currentPage = 1; // Reset to first page
+    updatePagination();
+    renderVehicles();
+}
 async function loadVehicles() {
     showLoading(true);
     try {
@@ -98,9 +224,11 @@ async function loadVehicles() {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const vehicles = await response.json();
-        renderVehicles(vehicles);
-        updateStats(vehicles);
+        allVehicles = await response.json();
+        filteredVehicles = [...allVehicles];
+        updateStats(allVehicles);
+        updatePagination();
+        renderVehicles();
     } catch (error) {
         showError('Failed to load vehicles. Please check if the server is running.');
         console.error('Error:', error);
@@ -210,8 +338,8 @@ async function deleteVehicle(vehicleCode) {
         text: "You won't be able to revert this!",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
+        confirmButtonColor: '#2980b9',
+        cancelButtonColor: '#2c3e50',
         confirmButtonText: 'Yes, delete it!'
     });
 
@@ -270,23 +398,27 @@ function handleUnauthorized() {
         window.location.href = 'login.html';
     }, 2000);
 }
-// UI Functions
-function renderVehicles(vehicles) {
+function renderVehicles() {
     vehicleTableBody.innerHTML = '';
 
-    if (vehicles.length === 0) {
+    // Get vehicles for current page
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredVehicles.length);
+    const currentVehicles = filteredVehicles.slice(startIndex, endIndex);
+
+    if (currentVehicles.length === 0) {
         vehicleTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; padding: 2rem;">
-                        <i class="fas fa-car" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
-                        <p>No vehicles found</p>
-                    </td>
-                </tr>
-            `;
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-car" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                    <p>No vehicles found</p>
+                </td>
+            </tr>
+        `;
         return;
     }
 
-    vehicles.forEach(vehicle => {
+    currentVehicles.forEach(vehicle => {
         const row = document.createElement('tr');
 
         // Determine status class
@@ -295,31 +427,36 @@ function renderVehicles(vehicles) {
         if (vehicle.status === 'Maintenance') statusClass = 'status-maintenance';
 
         row.innerHTML = `
-                <td>${vehicle.vehicleCode}</td>
-                <td>${vehicle.licensePlateNumber}</td>
-                <td>${vehicle.vehicleCategory}</td>
-                <td>${vehicle.fuelType}</td>
-                <td><span class="status-badge ${statusClass}">${vehicle.status}</span></td>
-                <td>${vehicle.staffId}</td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="action-btn view-btn" data-id="${vehicle.vehicleCode}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="action-btn edit-btn" data-id="${vehicle.vehicleCode}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn delete-btn" data-id="${vehicle.vehicleCode}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
+            <td>${vehicle.vehicleCode}</td>
+            <td>${vehicle.licensePlateNumber}</td>
+            <td>${vehicle.vehicleCategory}</td>
+            <td>${vehicle.fuelType}</td>
+            <td><span class="status-badge ${statusClass}">${vehicle.status}</span></td>
+            <td>${vehicle.staffId}</td>
+            <td>
+                <div class="action-buttons">
+                    <button class="action-btn view-btn" data-id="${vehicle.vehicleCode}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn edit-btn" data-id="${vehicle.vehicleCode}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" data-id="${vehicle.vehicleCode}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        `;
 
         vehicleTableBody.appendChild(row);
     });
 
     // Add event listeners to action buttons
+    addActionButtonListeners();
+}
+
+// Extract the button listener code to a separate function
+function addActionButtonListeners() {
     document.querySelectorAll('.view-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const vehicleCode = e.currentTarget.getAttribute('data-id');
@@ -352,12 +489,13 @@ function updateStats(vehicles) {
     maintenanceVehiclesEl.textContent = maintenanceCount;
 }
 
-// Auto-generate ID when opening the add form
+// Also call when opening the add form to refresh staff list
 function openAddForm() {
     editMode.value = 'false';
     popupTitle.textContent = 'Add New Vehicle';
     vehicleForm.reset();
-    generateNextVehicleId(); // Auto-generate ID
+    generateNextVehicleId();
+    populateStaffDropdown(); // Add this line
     vehicleFormPopup.classList.add('active');
 }
 
@@ -510,43 +648,41 @@ function showVehicleDetails(vehicle) {
 
 function filterVehicles() {
     const searchTerm = searchInput.value.toLowerCase();
-    const rows = vehicleTableBody.getElementsByTagName('tr');
 
-    for (let row of rows) {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    if (searchTerm === '') {
+        filteredVehicles = [...allVehicles];
+    } else {
+        filteredVehicles = allVehicles.filter(vehicle => {
+            return Object.values(vehicle).some(value =>
+                value && value.toString().toLowerCase().includes(searchTerm)
+            );
+        });
     }
+
+    currentPage = 1; // Reset to first page when filtering
+    updatePagination();
+    renderVehicles();
 }
 
 function exportData() {
-    // Get all vehicle data
-    const table = document.querySelector('table');
+    // Use filteredVehicles instead of visible rows in the DOM
     let csv = [];
 
     // Get headers
-    const headers = [];
-    document.querySelectorAll('th').forEach(header => {
-        headers.push(header.textContent);
-    });
+    const headers = ['Vehicle Code', 'License Plate', 'Category', 'Fuel Type', 'Status', 'Staff ID'];
     csv.push(headers.join(','));
 
-    // Get rows
-    document.querySelectorAll('tbody tr').forEach(row => {
-        if (row.style.display !== 'none') {
-            const rowData = [];
-            row.querySelectorAll('td').forEach((cell, index) => {
-                // Skip actions column
-                if (index < 6) {
-                    // Handle status badge
-                    if (cell.querySelector('.status-badge')) {
-                        rowData.push(cell.querySelector('.status-badge').textContent);
-                    } else {
-                        rowData.push(cell.textContent);
-                    }
-                }
-            });
-            csv.push(rowData.join(','));
-        }
+    // Get rows from filteredVehicles
+    filteredVehicles.forEach(vehicle => {
+        const rowData = [
+            vehicle.vehicleCode,
+            vehicle.licensePlateNumber,
+            vehicle.vehicleCategory,
+            vehicle.fuelType,
+            vehicle.status,
+            vehicle.staffId
+        ];
+        csv.push(rowData.join(','));
     });
 
     // Download CSV
@@ -563,16 +699,12 @@ function exportData() {
 }
 
 function printTable() {
-    // Get all visible rows (after filtering)
-    const visibleRows = Array.from(vehicleTableBody.querySelectorAll('tr'))
-        .filter(row => row.style.display !== 'none');
-
-    if (visibleRows.length === 0) {
+    if (filteredVehicles.length === 0) {
         showError('No data to print');
         return;
     }
 
-    // Create table HTML for printing
+    // Create table HTML for printing using filteredVehicles
     let tableHTML = `
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
             <thead>
@@ -588,17 +720,16 @@ function printTable() {
             <tbody>
     `;
 
-    // Add rows
-    visibleRows.forEach(row => {
-        const cells = row.querySelectorAll('td');
+    // Add rows from filteredVehicles
+    filteredVehicles.forEach(vehicle => {
         tableHTML += `
             <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">${cells[0].textContent}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${cells[1].textContent}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${cells[2].textContent}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${cells[3].textContent}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${cells[4].textContent}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${cells[5].textContent}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${vehicle.vehicleCode}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${vehicle.licensePlateNumber}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${vehicle.vehicleCategory}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${vehicle.fuelType}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${vehicle.status}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${vehicle.staffId}</td>
             </tr>
         `;
     });
@@ -641,7 +772,7 @@ function printTable() {
             <h1>Vehicle Management System - Report</h1>
             <div class="report-info">
                 <p>Generated on: ${new Date().toLocaleString()}</p>
-                <p>Total Records: ${visibleRows.length}</p>
+                <p>Total Records: ${filteredVehicles.length}</p>
             </div>
             ${tableHTML}
             <script>
@@ -735,13 +866,11 @@ function applyFilters(filters) {
 }
 
 function clearFilters() {
-    const rows = vehicleTableBody.getElementsByTagName('tr');
-
-    for (let row of rows) {
-        row.style.display = '';
-    }
-
+    filteredVehicles = [...allVehicles];
     searchInput.value = '';
+    currentPage = 1; // Reset to first page
+    updatePagination();
+    renderVehicles();
     showSuccess('Filters cleared successfully');
 }
 
@@ -1015,6 +1144,7 @@ function showReportModal(title, chartType, labels, data, backgroundColors) {
     }, 100);
 }
 
+// In the generateFullReport function, update chart creation to include titles:
 function createChart(canvasId, type, labels, data, backgroundColors, title) {
     const ctx = document.getElementById(canvasId).getContext('2d');
 
@@ -1023,7 +1153,7 @@ function createChart(canvasId, type, labels, data, backgroundColors, title) {
         window[canvasId + 'Chart'].destroy();
     }
 
-    // Create new chart
+    // Create new chart with proper title
     window[canvasId + 'Chart'] = new Chart(ctx, {
         type: type,
         data: {
@@ -1044,11 +1174,21 @@ function createChart(canvasId, type, labels, data, backgroundColors, title) {
                     display: true,
                     text: title,
                     font: {
-                        size: 16
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 20
                     }
                 },
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
                 }
             }
         }
@@ -1082,7 +1222,20 @@ function exportChartAsImage() {
     // For single chart reports
     if (canvases.length === 1) {
         const canvas = canvases[0];
-        const image = canvas.toDataURL('image/png');
+        // Create a temporary canvas with white background
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const ctx = tempCanvas.getContext('2d');
+
+        // Fill with white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+        // Draw the original chart on top
+        ctx.drawImage(canvas, 0, 0);
+
+        const image = tempCanvas.toDataURL('image/png');
         const link = document.createElement('a');
         link.href = image;
         link.download = 'vehicle_report_chart.png';
@@ -1099,8 +1252,10 @@ function exportChartAsImage() {
             denyButtonText: 'Status Chart',
             showConfirmButton: canvases.length > 1,
             preConfirm: () => {
-                // Export all charts
-                html2canvas(document.getElementById('reportContent')).then(canvas => {
+                // Export all charts with white background
+                html2canvas(document.getElementById('reportContent'), {
+                    backgroundColor: '#ffffff'
+                }).then(canvas => {
                     const image = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
                     link.href = image;
@@ -1109,8 +1264,18 @@ function exportChartAsImage() {
                 });
             },
             preDeny: () => {
-                // Export status chart
-                const image = canvases[0].toDataURL('image/png');
+                // Export status chart with white background
+                const canvas = canvases[0];
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const ctx = tempCanvas.getContext('2d');
+
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                ctx.drawImage(canvas, 0, 0);
+
+                const image = tempCanvas.toDataURL('image/png');
                 const link = document.createElement('a');
                 link.href = image;
                 link.download = 'vehicle_status_chart.png';
@@ -1124,66 +1289,120 @@ function exportReportAsPdf(vehicles) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // Add title
+    // Set page margins and initial position
+    const margin = 15;
+    let yPosition = margin;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const centerX = pageWidth / 2;
+
+    // Add title with styling
     doc.setFontSize(20);
-    doc.text('Vehicle Management System Report', 105, 15, { align: 'center' });
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(44, 62, 80); // Dark blue color
+    doc.text('Vehicle Management System Report', centerX, yPosition, { align: 'center' });
+    yPosition += 12;
 
     // Add date
     doc.setFontSize(12);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 105, 22, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, centerX, yPosition, { align: 'center' });
+    yPosition += 20;
 
-    // Add summary if vehicles data is provided
+    // Add summary section with proper styling
     if (vehicles) {
-        doc.setFontSize(12);
-        doc.text(`Total Vehicles: ${vehicles.length}`, 20, 30);
-
-        // Add status counts
-        const statusCounts = countByProperty(vehicles, 'status');
-        let yPosition = 40;
-
-        doc.setFontSize(14);
-        doc.text('Status Summary', 20, yPosition);
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(44, 62, 80);
+        doc.text('Summary', margin, yPosition);
         yPosition += 10;
 
-        doc.setFontSize(12);
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'normal');
+
+        // Total vehicles
+        doc.setTextColor(44, 62, 80);
+        doc.setFont(undefined, 'bold');
+        doc.text('Total Vehicles:', margin, yPosition);
+        doc.setTextColor(0, 0, 0);
+        doc.text(vehicles.length.toString(), pageWidth - margin - doc.getTextWidth(vehicles.length.toString()), yPosition);
+        yPosition += 8;
+
+        // Status counts
+        const statusCounts = countByProperty(vehicles, 'status');
         Object.keys(statusCounts).forEach(status => {
-            doc.text(`${status}: ${statusCounts[status]}`, 20, yPosition);
-            yPosition += 7;
+            if (yPosition > 250) {
+                doc.addPage();
+                yPosition = margin;
+            }
+
+            doc.setTextColor(44, 62, 80);
+            doc.setFont(undefined, 'bold');
+            doc.text(`${status}:`, margin, yPosition);
+            doc.setTextColor(0, 0, 0);
+            const countText = `${statusCounts[status]} (${Math.round((statusCounts[status] / vehicles.length) * 100)}%)`;
+            doc.text(countText, pageWidth - margin - doc.getTextWidth(countText), yPosition);
+            yPosition += 8;
         });
 
         yPosition += 5;
-
-        // Add category counts
-        doc.setFontSize(14);
-        doc.text('Category Summary', 20, yPosition);
-        yPosition += 10;
-
-        doc.setFontSize(12);
-        const categoryCounts = countByProperty(vehicles, 'vehicleCategory');
-        Object.keys(categoryCounts).forEach(category => {
-            doc.text(`${category}: ${categoryCounts[category]}`, 20, yPosition);
-            yPosition += 7;
-        });
     }
 
-    // Add chart images if available
+    // Add charts with proper sizing
     const canvases = document.querySelectorAll('#reportContent canvas');
-    let yPosition = vehicles ? 120 : 30;
 
     canvases.forEach((canvas, index) => {
-        if (index > 0 && yPosition > 240) {
+        // Check if we need a new page
+        if (yPosition > 150 && index > 0) {
             doc.addPage();
-            yPosition = 20;
+            yPosition = margin;
         }
 
-        const imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', 20, yPosition, 170, 100);
-        yPosition += 110;
+        const imgData = canvas.toDataURL('image/png', 1.0); // Higher quality
+        const imgWidth = 170;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Add chart title if available
+        const chartTitle = getChartTitle(canvas);
+        if (chartTitle) {
+            if (yPosition > 220) {
+                doc.addPage();
+                yPosition = margin;
+            }
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(44, 62, 80);
+            doc.text(chartTitle, centerX, yPosition, { align: 'center' });
+            yPosition += 8;
+        }
+
+        // Add the chart image
+        doc.addImage(imgData, 'PNG', centerX - (imgWidth/2), yPosition, imgWidth, imgHeight);
+        yPosition += imgHeight + 15;
     });
+
+    // Add footer with page numbers
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin, doc.internal.pageSize.getHeight() - 10);
+    }
 
     // Save the PDF
     doc.save('vehicle_management_report.pdf');
     showSuccess('PDF report downloaded successfully');
+}
+
+// Helper function to extract chart title
+function getChartTitle(canvas) {
+    const chart = Chart.getChart(canvas);
+    if (chart && chart.options && chart.options.plugins && chart.options.plugins.title) {
+        return chart.options.plugins.title.text;
+    }
+    return null;
 }
 
 // Add event listeners for closing report modal
@@ -1202,11 +1421,14 @@ function showSuccess(message) {
         text: message,
         icon: 'success',
         confirmButtonText: 'OK',
+        confirmButtonColor: '#3498db',
         customClass: {
-            popup: 'custom-swal-popup'
+            popup: 'custom-swal-popup',
+            icon: 'custom-swal-icon'
         }
     });
 }
+
 
 function showError(message) {
     Swal.fire({
@@ -1214,6 +1436,7 @@ function showError(message) {
         text: message,
         icon: 'error',
         confirmButtonText: 'OK',
+        confirmButtonColor: '#3498db',
         customClass: {
             popup: 'custom-swal-popup'
         }

@@ -117,7 +117,29 @@
             opacity: 1;
             transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
         }
+        /* Add this to your existing CSS */
+        .alert {
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
 
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
         /* Cart Items */
         .cart-container {
             background: var(--card-bg);
@@ -846,16 +868,17 @@
 
     </style>
 
+
 </head>
 <body>
 
-<!-- Add this cart icon target for the animation -->
-<div class="cart-icon-target" id="cartIconTarget">
-    <i class="fas fa-shopping-cart"></i>
-    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartBadge">
-      0
-    </span>
-</div>
+<!--&lt;!&ndash; Add this cart icon target for the animation &ndash;&gt;-->
+<!--<div class="cart-icon-target" id="cartIconTarget">-->
+<!--    <i class="fas fa-shopping-cart"></i>-->
+<!--    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartBadge">-->
+<!--      0-->
+<!--    </span>-->
+<!--</div>-->
 <!-- Spinner Start -->
 <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
@@ -880,7 +903,6 @@
                     <a href="#features" class="nav-item nav-link">Features</a>
                     <a href="#testimonials" class="nav-item nav-link">Testimonials</a>
                     <a href="#contact" class="nav-item nav-link">Contact</a>
-                    <a href="orders.html" class="nav-item nav-link">My Orders</a>
                     <a href="Signup.html" class="nav-item nav-link">Sign Up</a>
                 </div>
                 <div class="border-start ps-4 d-none d-lg-block">
@@ -937,7 +959,7 @@
                             <div class="col-lg-8 text-center">
                                 <p class="fs-4 text-white animated zoomIn">Towards <strong class="text-dark">Sustainability</strong></p>
                                 <h1 class="display-1 text-dark mb-4 animated zoomIn">Technology for a Greener Future</h1>
-                                <a href="#contact" class="btn btn-light rounded-pill py-3 px-5 animated zoomIn">Get Started</a>
+                                <a href="Signup.html" class="btn btn-light rounded-pill py-3 px-5 animated zoomIn">Get Started</a>
                             </div>
                         </div>
                     </div>
@@ -1210,533 +1232,6 @@
 </div>
 <!-- Video Modal End -->
 
-
-<!-- Store Start -->
-<div class="container">
-    <!-- Page Header -->
-    <div class="page-header-section">
-        <div class="header-background">
-            <img class="w-100" src="images/home-image-02.webp" alt="Precision Agriculture">
-            <div class="header-overlay"></div>
-            <div class="header-content">
-                <div class="header-badge">
-                    <div class="badge-icon">
-                        <i class="fas fa-shopping-basket"></i>
-                    </div>
-                    <span>My Shopping Cart</span>
-                </div>
-                <h1 class="header-title">Harvest Your Selection</h1>
-                <p class="header-subtitle">Review your freshly picked items and proceed to secure checkout</p>
-                <div class="header-decoration">
-                    <div class="decoration-item">
-                        <i class="fas fa-truck"></i>
-                        <span>Free Shipping</span>
-                    </div>
-                    <div class="decoration-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Secure Payment</span>
-                    </div>
-                    <div class="decoration-item">
-                        <i class="fas fa-seedling"></i>
-                        <span>Farm Fresh</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add to Cart Form -->
-    <div class="form-card">
-        <h5><i class="fas fa-plus-circle text-primary"></i> Add New Item</h5>
-        <form id="cartForm">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="form-floating">
-                        <select id="userId" class="form-select" required>
-                            <option value="">Select User ID</option>
-                            <option value="U001">U001</option>
-                            <option value="U002">U002</option>
-                            <option value="U003">U003</option>
-                            <option value="U004">U004</option>
-                            <option value="U005">U005</option>
-                        </select>
-                        <label for="userId"><i class="fas fa-user text-primary"></i> User ID</label>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-floating">
-                        <input type="text" id="cropCode" class="form-control" placeholder="Crop Code" required>
-                        <label for="cropCode"><i class="fas fa-leaf text-primary"></i> Crop Code</label>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="form-floating">
-                        <input type="number" id="quantity" class="form-control" placeholder="Quantity" min="1" value="1" required>
-                        <label for="quantity"><i class="fas fa-hashtag text-primary"></i> Quantity</label>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-6 col-md-2">
-                    <button type="submit" class="btn btn-primary w-100 h-100">
-                        <i class="fas fa-cart-plus me-2"></i> Add to Cart
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-8">
-            <!-- Cart Items -->
-            <div class="cart-container">
-                <div class="table-responsive">
-                    <table class="table cart-table" id="cartTable">
-                        <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th class="text-center">Image</th>
-                            <th class="text-center">Quantity</th>
-                            <th class="text-center">Price</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody id="cartBody">
-                        <!-- Cart items will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-between mt-4">
-<!--                <a href="#" class="btn btn-outline-primary rounded-pill px-4">-->
-<!--                    <i class="fas fa-arrow-left me-2"></i> Continue Shopping-->
-<!--                </a>-->
-                <button class="btn btn-danger rounded-pill px-4" onclick="clearCart()">
-                    <i class="fas fa-trash me-2"></i> Clear Cart
-                </button>
-            </div>
-        </div>
-
-        <div class="col-lg-4 mt-4 mt-lg-0">
-            <!-- Order Summary -->
-            <div class="cart-summary">
-                <h4 class="mb-4 text-primary">Order Summary</h4>
-
-                <div class="summary-item">
-                    <span>Subtotal</span>
-                    <span id="subtotal">$0.00</span>
-                </div>
-                <div class="summary-item">
-                    <span>Shipping</span>
-                    <span>$5.00</span>
-                </div>
-                <div class="summary-item">
-                    <span>Tax</span>
-                    <span id="tax">$0.00</span>
-                </div>
-                <div class="summary-item summary-total">
-                    <span>Total</span>
-                    <span id="total">$0.00</span>
-                </div>
-
-                <div class="d-grid gap-2 mt-4">
-                    <button class="btn btn-primary rounded-pill py-3" id="checkoutBtn">
-                        <i class="fas fa-check-circle me-2"></i> Proceed to Checkout
-                    </button>
-                </div>
-
-                <div class="text-center mt-3">
-                    <small class="text-muted">
-                        <i class="fas fa-lock me-1"></i> Your information is safe and secure
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- JavaScript -->
-
-<script>
-    const API_BASE = "http://localhost:8080/api/v1/cart";
-
-    // Function to get JWT token from storage
-    function getToken() {
-        return localStorage.getItem('jwtToken');
-    }
-
-    // Function to check if user is authenticated
-    function checkAuth() {
-        const token = getToken();
-        if (!token) {
-            alert('Please login first');
-            window.location.href = 'SignIn.html';
-            return false;
-        }
-
-        // Check if token is expired
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            if (payload.exp * 1000 < Date.now()) {
-                alert('Session expired. Please login again.');
-                localStorage.removeItem('jwtToken');
-                window.location.href = 'SignIn.html';
-                return false;
-            }
-        } catch (e) {
-            console.error('Token parsing error:', e);
-            localStorage.removeItem('jwtToken');
-            window.location.href = 'SignIn.html';
-            return false;
-        }
-
-        return true;
-    }
-    // Call this on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        if (checkAuth()) {
-            debugJWT();
-        }
-    });
-    // Add this JavaScript code to handle the dropdown change events
-    document.addEventListener('DOMContentLoaded', function() {
-        const userIdSelect = document.getElementById('userId');
-
-        // Auto-load cart when user ID is selected
-        userIdSelect.addEventListener('change', function() {
-            if (this.value) {
-                loadCart(this.value);
-            }
-        });
-
-        // Check if user is logged in on page load
-        if (!checkAuth()) return;
-
-        // Auto-load cart if userId already has a value (from page load)
-        if (userIdSelect.value) {
-            loadCart(userIdSelect.value);
-        }
-    });
-
-    // Add this error handling wrapper to all your fetch calls
-    async function authenticatedFetch(url, options = {}) {
-        if (!checkAuth()) return null;
-
-        const token = getToken();
-        const defaultOptions = {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        };
-
-        const mergedOptions = { ...defaultOptions, ...options };
-
-        try {
-            const response = await fetch(url, mergedOptions);
-
-            if (response.status === 401 || response.status === 403) {
-                alert("Session expired. Please login again.");
-                localStorage.removeItem('jwtToken');
-                window.location.href = 'SignIn.html';
-                return null;
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            return response;
-        } catch (error) {
-            console.error('Fetch error:', error);
-            throw error;
-        }
-    }
-    // Debug function to check what's in the JWT token
-    function debugJWT() {
-        const token = getToken();
-        if (token) {
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                console.log('JWT Payload:', payload);
-                console.log('Role from token:', payload.role);
-                console.log('Role type:', typeof payload.role);
-
-                // Check what exact string is in the role
-                console.log('Role string length:', payload.role.length);
-                console.log('Role char codes:');
-                for (let i = 0; i < payload.role.length; i++) {
-                    console.log(`  ${i}: '${payload.role[i]}' (${payload.role.charCodeAt(i)})`);
-                }
-
-                return payload.role;
-            } catch (e) {
-                console.error('Error parsing token:', e);
-            }
-        }
-        return null;
-    }
-    // Handle Add to Cart with animation
-    document.getElementById("cartForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        if (!checkAuth()) return;
-
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const userRole = payload.role; // Extract role from token
-
-        const cartData = {
-            userId: document.getElementById("userId").value,
-            cropCode: document.getElementById("cropCode").value,
-            quantity: parseInt(document.getElementById("quantity").value),
-            role: userRole // Use the role from token
-        };
-
-        // Create flying item animation
-        const addButton = e.target.querySelector('button[type="submit"]');
-        const buttonRect = addButton.getBoundingClientRect();
-
-        // Create flying item - LARGER SIZE
-        const flyingItem = document.createElement('div');
-        flyingItem.className = 'flying-item';
-        flyingItem.innerHTML = '<i class="fas fa-leaf"></i>';
-        flyingItem.style.left = `${buttonRect.left + buttonRect.width/2 - 30}px`;
-        flyingItem.style.top = `${buttonRect.top + buttonRect.height/2 - 30}px`;
-        document.body.appendChild(flyingItem);
-
-        // Get target position (cart icon in nav)
-        const target = document.getElementById('cartIconTarget');
-        const targetRect = target.getBoundingClientRect();
-
-        // Animate the flying item to the cart icon
-        setTimeout(() => {
-            flyingItem.style.left = `${targetRect.left + targetRect.width/2 - 30}px`;
-            flyingItem.style.top = `${targetRect.top + targetRect.height/2 - 30}px`;
-            flyingItem.style.transform = 'scale(0.7)';
-            flyingItem.style.opacity = '0.8';
-        }, 10);
-
-        try {
-            const response = await authenticatedFetch(API_BASE, {
-                method: "POST",
-                body: JSON.stringify(cartData),
-            });
-
-            if (response) {
-                // Complete animation and remove element
-                setTimeout(() => {
-                    flyingItem.style.opacity = '0';
-                    setTimeout(() => {
-                        document.body.removeChild(flyingItem);
-                    }, 300);
-
-                    // Add bounce effect to cart icon
-                    target.classList.add('bounce');
-                    setTimeout(() => {
-                        target.classList.remove('bounce');
-                    }, 1000);
-
-                    // Update cart badge count
-                    updateCartBadge(cartData.userId);
-
-                    // Load updated cart
-                    loadCart(cartData.userId);
-                }, 800);
-
-                // Reset form
-                document.getElementById("cropCode").value = "";
-                document.getElementById("quantity").value = "1";
-            } else {
-                document.body.removeChild(flyingItem);
-            }
-        } catch (err) {
-            console.error("Error:", err);
-            document.body.removeChild(flyingItem);
-        }
-    });
-
-    // Function to update cart badge count
-    async function updateCartBadge(userId) {
-        if (!checkAuth()) return;
-
-        try {
-            const response = await authenticatedFetch(`${API_BASE}/user/${userId}`);
-            if (response) {
-                const items = await response.json();
-                document.getElementById('cartBadge').textContent = items.length;
-            }
-        } catch (err) {
-            console.error("Error updating cart badge:", err);
-        }
-    }
-
-    // Update the loadCart function to also update the badge count
-    async function loadCart(userId) {
-        if (!checkAuth()) return;
-
-        try {
-            const response = await authenticatedFetch(`${API_BASE}/user/${userId}`);
-
-            if (!response) return;
-
-            const items = await response.json();
-            const cartBody = document.getElementById("cartBody");
-
-            // Update cart badge
-            document.getElementById('cartBadge').textContent = items.length;
-
-            if (items.length === 0) {
-                cartBody.innerHTML = `
-                    <tr>
-                        <td colspan="5">
-                            <div class="empty-cart">
-                                <i class="fas fa-shopping-cart"></i>
-                                <h4 class="text-muted">Your cart is empty</h4>
-                                <p>Add some products to your cart from our store</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                updateCartSummary(0);
-                return;
-            }
-
-            cartBody.innerHTML = "";
-            let subtotal = 0;
-
-            items.forEach(item => {
-                // Calculate item price (example calculation)
-                const price = 19.99; // This should come from your API
-                const itemTotal = price * item.quantity;
-                subtotal += itemTotal;
-
-                cartBody.innerHTML += `
-                    <tr>
-                        <td data-label="Product">
-                            <div class="d-flex align-items-center">
-                                <div class="ms-3">
-                                    <h6 class="mb-0">${item.cropName || 'Product'}</h6>
-                                    <small class="text-muted">Code: ${item.cropCode}</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td data-label="Image" class="text-center">
-                            ${item.cropImage
-                    ? `<img src="data:image/png;base64,${item.cropImage}" alt="${item.cropName}" class="cart-item-image">`
-                    : '<div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;"><i class="fas fa-image text-muted"></i></div>'}
-                        </td>
-                        <td data-label="Quantity" class="text-center">
-                            <input type="number" class="quantity-input" value="${item.quantity}" min="1"
-                                onchange="updateCartItem('${item.cartId}', this.value, '${item.userId}')">
-                        </td>
-                        <td data-label="Price" class="text-center">$${itemTotal.toFixed(2)}</td>
-                        <td data-label="Actions" class="text-center">
-                            <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart('${item.cartId}', '${item.userId}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            updateCartSummary(subtotal);
-
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    // Update cart summary
-    function updateCartSummary(subtotal) {
-        const shipping = 5.00;
-        const tax = subtotal * 0.08; // 8% tax
-        const total = subtotal + shipping + tax;
-
-        document.getElementById("subtotal").textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById("tax").textContent = `$${tax.toFixed(2)}`;
-        document.getElementById("total").textContent = `$${total.toFixed(2)}`;
-    }
-
-    // Update Cart Item Quantity
-    async function updateCartItem(cartId, quantity, userId) {
-        if (!checkAuth()) return;
-
-        try {
-            const response = await authenticatedFetch(`${API_BASE}/${cartId}?quantity=${quantity}`, {
-                method: "PUT"
-            });
-
-            if (response) {
-                loadCart(userId);
-            } else {
-                alert("Error updating item");
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    // Remove Item
-    async function removeFromCart(cartId, userId) {
-        if (!checkAuth()) return;
-
-        if (!confirm("Are you sure you want to remove this item from your cart?")) return;
-
-        try {
-            const response = await authenticatedFetch(`${API_BASE}/${cartId}`, {
-                method: "DELETE"
-            });
-
-            if (response) {
-                loadCart(userId);
-            } else {
-                alert("Error removing item");
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-
-    // Clear Cart
-    async function clearCart() {
-        const userId = document.getElementById("userId").value;
-        if (!userId) return alert("Enter User ID first");
-
-        if (!checkAuth()) return;
-
-        if (!confirm("Are you sure you want to clear your entire cart?")) return;
-
-        try {
-            const response = await authenticatedFetch(`${API_BASE}/user/${userId}`, {
-                method: "DELETE"
-            });
-
-            if (response) {
-                document.getElementById("cartBody").innerHTML = `
-                    <tr>
-                        <td colspan="5">
-                            <div class="empty-cart">
-                                <i class="fas fa-shopping-cart"></i>
-                                <h4 class="text-muted">Your cart is empty</h4>
-                                <p>Add some products to your cart from our store</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                updateCartSummary(0);
-            } else {
-                alert("Error clearing cart");
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }
-</script>
-<!-- Store End -->
-
-
 <!-- Testimonial Start -->
 <div class="container-fluid testimonial py-5 my-5" id="testimonials">
     <div class="container py-5">
@@ -1894,61 +1389,62 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" placeholder="Your Name" required>
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Your Name" required>
                                     <label for="name"><i class="fas fa-user me-2"></i>Your Name</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" placeholder="Your Email" required>
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Your Email" required>
                                     <label for="email"><i class="fas fa-envelope me-2"></i>Your Email</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control" id="phone" placeholder="Your Phone">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Your Phone">
                                     <label for="phone"><i class="fas fa-phone me-2"></i>Your Phone</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="subject" placeholder="Subject" required>
+                                    <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required>
                                     <label for="subject"><i class="fas fa-tag me-2"></i>Subject</label>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <select class="form-select" id="inquiryType">
-                                        <option selected>General Inquiry</option>
-                                        <option>Technical Support</option>
-                                        <option>Sales Question</option>
-                                        <option>Partnership</option>
-                                        <option>Other</option>
+                                    <select class="form-select" id="inquiryType" name="inquiryType">
+                                        <option value="General Inquiry">General Inquiry</option>
+                                        <option value="Technical Support">Technical Support</option>
+                                        <option value="Sales Question">Sales Question</option>
+                                        <option value="Partnership">Partnership</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                     <label for="inquiryType"><i class="fas fa-question-circle me-2"></i>Inquiry Type</label>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <textarea class="form-control" placeholder="Leave a message here" id="message" style="height: 150px" required></textarea>
+                                    <textarea class="form-control" placeholder="Leave a message here" id="message" name="message" style="height: 150px" required></textarea>
                                     <label for="message"><i class="fas fa-comment-dots me-2"></i>Your Message</label>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="newsletter">
+                                    <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter">
                                     <label class="form-check-label" for="newsletter">
                                         Subscribe to our newsletter for updates on plantation technology
                                     </label>
                                 </div>
                             </div>
                             <div class="col-12">
-                                <button class="btn btn-primary py-3 px-5 w-100" type="submit">
+                                <button class="btn btn-primary py-3 px-5 w-100" type="submit" id="submitBtn">
                                     <i class="fas fa-paper-plane me-2"></i> Send Message
                                 </button>
                             </div>
                         </div>
                     </form>
+                    <div id="formMessage" class="mt-3" style="display: none;"></div>
                 </div>
             </div>
         </div>
@@ -1982,7 +1478,7 @@
                 <!-- Office Info -->
                 <div class="col-lg-3 col-md-6">
                     <div class="footer-brand mb-4">
-                        <img src="images/Plant-logo.png" alt="Silver Harvest" class="footer-logo mb-3">
+                        <img src="images/Plant-logo-01.png" alt="Silver Harvest" class="footer-logo mb-3">
                         <p class="footer-text">Advanced plantation monitoring for sustainable agriculture</p>
                     </div>
                     <div class="footer-contact">
@@ -2044,11 +1540,11 @@
                             <span class="time closed">Closed</span>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <a href="#" class="btn btn-outline-primary rounded-pill">
-                            <i class="fas fa-calendar-alt me-2"></i> Book Appointment
-                        </a>
-                    </div>
+<!--                    <div class="mt-4">-->
+<!--                        <a href="#" class="btn btn-outline-primary rounded-pill">-->
+<!--                            <i class="fas fa-calendar-alt me-2"></i> Book Appointment-->
+<!--                        </a>-->
+<!--                    </div>-->
                 </div>
 
                 <!-- Newsletter -->
@@ -2117,5 +1613,57 @@
 
 <!-- Your Custom JS -->
 <script src="js/main.js"></script>
+
+<!-- Add this right before the closing </head> tag -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+
+    (function() {
+        emailjs.init("tJ7DDVkySO9Pv9dZQ");
+    })();
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactForm = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const formMessage = document.getElementById('formMessage');
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Sending...';
+            submitBtn.disabled = true;
+
+            emailjs.sendForm('service_038z2zi', 'template_63m8xnp', this)
+                .then(function() {
+
+                    formMessage.innerHTML = '<div class="alert alert-success">Thank you! Your message has been sent successfully.</div>';
+                    formMessage.style.display = 'block';
+
+
+                    contactForm.reset();
+
+
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Send Message';
+                    submitBtn.disabled = false;
+
+
+                    setTimeout(() => {
+                        formMessage.style.display = 'none';
+                    }, 5000);
+                }, function(error) {
+
+                    formMessage.innerHTML = '<div class="alert alert-danger">Sorry, there was an error sending your message. Please try again later.</div>';
+                    formMessage.style.display = 'block';
+
+
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Send Message';
+                    submitBtn.disabled = false;
+
+                    console.error('EmailJS error:', error);
+                });
+        });
+    });
+</script>
 </body>
 </html>

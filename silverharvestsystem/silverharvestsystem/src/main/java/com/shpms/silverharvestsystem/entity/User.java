@@ -22,6 +22,6 @@ public class User implements SuperEntity{
     private String lastName;
     private String email;
     private String password;
-    @Enumerated(EnumType.STRING) // ✅ store enum as VARCHAR in DB
+    @Enumerated(EnumType.STRING)
     private Role role;
 }
