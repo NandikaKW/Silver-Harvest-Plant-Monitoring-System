@@ -188,6 +188,9 @@ We typically respond to inquiries within 24 hours during business days.
 **⚡ Note**: This setup runs the **Spring Boot backend** on `http://localhost:8080` and the **Bootstrap/jQuery frontend** directly in your browser.
 
 ---
+## 📺 Project Demo Video
+Watch here: [YouTube Link](https://youtu.be/NOLES_IG7Nc)
+
 
 <div align="center">
   
