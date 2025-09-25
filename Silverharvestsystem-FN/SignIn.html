@@ -310,7 +310,7 @@
         // Save JWT in localStorage
         localStorage.setItem("jwtToken", token);
 
-        // ✅ Decode token to extract role
+        // Save user role
         const payload = JSON.parse(atob(token.split(".")[1]));
         const role = payload.role;
         localStorage.setItem("userRole", role);

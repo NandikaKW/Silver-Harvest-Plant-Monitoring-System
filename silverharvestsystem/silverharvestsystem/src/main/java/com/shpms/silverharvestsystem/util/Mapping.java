@@ -85,7 +85,4 @@ public class Mapping {
         return modelMapper.map(users, new TypeToken<List<UserDto>>() {}.getType());
     }
 
-    public CartDTO toCartDTO(Cart cart) {
-        return modelMapper.map(cart, CartDTO.class);
-    }
 }

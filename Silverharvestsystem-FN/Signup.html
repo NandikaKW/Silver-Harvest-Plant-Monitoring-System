@@ -103,6 +103,85 @@
                 opacity: 1;
             }
         }
+        /* Learn More Modal Styles */
+        .learn-more-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .learn-more-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .learn-more-content {
+            background: rgba(0, 0, 0, .9);
+            border-radius: 8px;
+            padding: 30px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid #95B736;
+            position: relative;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #95B736;
+            cursor: pointer;
+        }
+
+        .learn-more-content h2 {
+            color: #95B736;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .learn-more-content p {
+            color: #b3b3b3;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .learn-more-content ul {
+            color: #b3b3b3;
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .learn-more-content a {
+            color: #95B736;
+            text-decoration: underline;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -135,7 +214,7 @@
     <p class="form-footer">Already have an account? <a href="SignIn.html">Sign in now</a></p>
     <small>
         This page is protected by Google reCAPTCHA to ensure you're not a bot.
-        <a href="#">Learn more.</a>
+        <a href="#" id="learnMoreLink">Learn more.</a>
     </small>
 </div>
 
@@ -153,7 +232,27 @@
         <div class="countdown" id="countdown">Redirecting in 5 seconds...</div>
     </div>
 </div>
+<!-- Learn More Modal -->
+<div class="learn-more-modal" id="learnMoreModal">
+    <div class="learn-more-content">
+        <button class="close-button" id="closeModal">&times;</button>
+        <h2>About reCAPTCHA Protection</h2>
+        <p>This site is protected by reCAPTCHA and the Google
+            <a href="https://policies.google.com/privacy" target="_blank">Privacy Policy</a> and
+            <a href="https://policies.google.com/terms" target="_blank">Terms of Service</a> apply.</p>
 
+        <p>reCAPTCHA is a free service from Google that helps protect websites from spam and abuse. A "CAPTCHA" is a test that determines whether a user is human or a computer program (bot).</p>
+
+        <p><strong>How it works:</strong></p>
+        <ul>
+            <li>Analyzes user behavior to detect bots</li>
+            <li>May present a challenge if suspicious activity is detected</li>
+            <li>Helps keep our platform secure for all users</li>
+        </ul>
+
+        <p>Your interactions with this site are protected and help improve Google's AI systems for spam detection.</p>
+    </div>
+</div>
 <script>
     // Function to show success popup
     function showSuccessPopup(title, message, redirectUrl, delay = 5000) {
@@ -185,7 +284,26 @@
             window.location.href = redirectUrl;
         };
     }
+    // Learn More Modal functionality
+    const learnMoreLink = document.getElementById('learnMoreLink');
+    const learnMoreModal = document.getElementById('learnMoreModal');
+    const closeModal = document.getElementById('closeModal');
 
+    learnMoreLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        learnMoreModal.classList.add('active');
+    });
+
+    closeModal.addEventListener('click', function() {
+        learnMoreModal.classList.remove('active');
+    });
+
+    // Close modal when clicking outside the content
+    window.addEventListener('click', function(e) {
+        if (e.target === learnMoreModal) {
+            learnMoreModal.classList.remove('active');
+        }
+    });
     document.getElementById("signupForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -202,7 +320,7 @@
             lastName: e.target.elements.lastName.value,
             email: e.target.elements.email.value,
             password: password,
-            role: "OTHER"
+            role: "ADMINISTRATIVE"
         };
 
         try {

@@ -86,12 +86,12 @@ public class CropServiceImpl implements CropService {
         crop.setScientificName(cropDto.getScientificName());
         crop.setCropSeason(cropDto.getCropSeason());
 
-        // only update image if new one is provided
+        // only update image
         if (cropDto.getCropImage() != null) {
             crop.setCropImage(cropDto.getCropImage());
         }
 
-        // ⚠️ because your entity has @ManyToOne for field and log
+        // ⚠️ because your entity
         if (cropDto.getFieldCode() != null) {
             Field field = new Field();
             field.setFieldCode(cropDto.getFieldCode());
@@ -103,7 +103,7 @@ public class CropServiceImpl implements CropService {
             crop.setLog(log);
         }
 
-        cropRepo.save(crop); // ✅ persist changes
+        cropRepo.save(crop);
     }
 
 

@@ -572,21 +572,30 @@ tr:hover {
     border-radius: 12px;
     box-shadow: var(--shadow);
     overflow: hidden;
-    padding: 2rem;
+    padding: 1.5rem;
     border: 1px solid var(--border-color);
 }
 
+/* Report Header */
 .report-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.8rem;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
     padding-bottom: 1.2rem;
     border-bottom: 1px solid var(--border-color);
 }
 
+@media (min-width: 768px) {
+    .report-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
 .report-header h3 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     color: var(--text-color);
     display: flex;
     align-items: center;
@@ -603,8 +612,23 @@ tr:hover {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.9rem;
 }
 
+/* Report Filters */
+.report-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 576px) {
+    .report-filters {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
 .report-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -813,42 +837,47 @@ tr:hover {
 /* Summary Stats */
 .summary-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
     margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .summary-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .summary-card {
     background: white;
     border-radius: 8px;
-    padding: 1.2rem;
+    padding: 1rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.8rem;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
 }
 
 .summary-icon {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    background: var(--primary-color);
-    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
 }
 
 .summary-content h4 {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--black-light-color);
     margin-bottom: 0.3rem;
 }
 
 .summary-content span {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--primary-color);
 }
@@ -856,6 +885,7 @@ tr:hover {
 /* Report Tabs */
 .report-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 1.5rem;
     border-bottom: 1px solid var(--border-color);
@@ -863,7 +893,7 @@ tr:hover {
 }
 
 .tab-btn {
-    padding: 0.8rem 1.2rem;
+    padding: 0.6rem 0.8rem;
     background: #f8f9fa;
     border: none;
     border-radius: 6px;
@@ -874,6 +904,10 @@ tr:hover {
     gap: 0.5rem;
     transition: var(--tran-03);
     border: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
 }
 
 .tab-btn:hover {
@@ -885,11 +919,15 @@ tr:hover {
     color: white;
 }
 
+.tab-btn i {
+    font-size: 0.9rem;
+}
+
 /* Tab Content */
 .tab-content {
     background: white;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem;
     box-shadow: var(--shadow);
     border: 1px solid var(--border-color);
 }
@@ -902,21 +940,29 @@ tr:hover {
     display: block;
 }
 
+/* Report Visualization */
 .report-visualization {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
+}
+
+@media (min-width: 992px) {
+    .report-visualization {
+        flex-direction: row;
+    }
 }
 
 .chart-container {
     background: #f8f9fa;
     border-radius: 8px;
     padding: 1rem;
-    height: 300px;
+    height: 250px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid var(--border-color);
+    min-height: 250px;
 }
 
 .report-insights {
@@ -932,6 +978,7 @@ tr:hover {
     gap: 0.5rem;
     margin-bottom: 1rem;
     color: var(--text-color);
+    font-size: 1rem;
 }
 
 .report-insights ul {
@@ -943,8 +990,10 @@ tr:hover {
     padding: 0.5rem 0;
     border-bottom: 1px solid #e9ecef;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
 }
 
 .report-insights li:before {
@@ -953,8 +1002,24 @@ tr:hover {
     font-weight: bold;
     display: inline-block;
     width: 1em;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
 }
 
+/* Additional responsive adjustments for very small screens */
+@media (max-width: 360px) {
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .tab-btn {
+        min-width: 100%;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+}
 @media (max-width: 768px) {
     .report-visualization {
         grid-template-columns: 1fr;

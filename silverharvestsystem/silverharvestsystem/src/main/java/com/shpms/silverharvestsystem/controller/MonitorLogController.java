@@ -87,14 +87,14 @@ public class MonitorLogController {
             logDto.setLogDate(logDate);
             logDto.setLogDetails(logDetails);
 
-            // Only process image if provided
+
             if (observedImage != null && !observedImage.isEmpty()) {
                 String base64ProPic = "";
                 byte[] bytesProPic = observedImage.getBytes();
                 base64ProPic = AppUtil.ImageToBase64(bytesProPic);
                 logDto.setObservedImage(base64ProPic);
             } else {
-                // Keep the existing image - you'll need to handle this in your service
+                // Keep the existing image
                 logDto.setObservedImage(null); // This will need special handling
             }
 

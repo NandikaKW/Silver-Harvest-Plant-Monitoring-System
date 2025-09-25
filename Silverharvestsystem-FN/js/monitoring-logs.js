@@ -148,9 +148,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStats();
 });
 // Initialize logout button on page load
-document.addEventListener('DOMContentLoaded', function() {
-    setupLogout();
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     setupLogout();
+// });
 logForm.addEventListener('submit', handleFormSubmit);
 cancelBtn.addEventListener('click', resetForm);
 observedImageInput.addEventListener('change', previewImage);

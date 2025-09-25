@@ -1,4 +1,4 @@
-// Add these variables at the top of the script
+// Global variables
 let currentPage = 1;
 let itemsPerPage = 10;
 let totalPages = 1;
@@ -67,7 +67,7 @@ async function makeAuthenticatedRequest(url, options = {}) {
     }
 }
 
-// SweetAlert configuration
+// SweetAlert notifications
 const Toast = Swal.mixin({
     toast: true,
     position: 'top-end',
@@ -278,7 +278,7 @@ $(document).ready(function() {
         }
     });
 
-    // Add this function to generate the next crop code
+    //  function to generate the next crop code
     function generateNextCropCode() {
         if (allCrops.length === 0) {
             return "C001";
@@ -299,7 +299,7 @@ $(document).ready(function() {
         return `C${nextNum.toString().padStart(3, '0')}`;
     }
 
-// Add this function to generate field codes
+    //  function to generate field codes
     function generateFieldCodes() {
         const fieldCodes = [];
         for (let i = 1; i <= 20; i++) {
@@ -308,7 +308,7 @@ $(document).ready(function() {
         return fieldCodes;
     }
 
-// Add this function to generate log codes
+//  function to generate log codes
     function generateLogCodes() {
         const logCodes = [];
         for (let i = 1; i <= 20; i++) {
@@ -317,7 +317,7 @@ $(document).ready(function() {
         return logCodes;
     }
 
-// Add this function to populate dropdowns
+//  function to populate dropdowns
     function populateDropdowns() {
         // Populate field code dropdown
         const $fieldCodeInput = $('#fieldCodeInput');
@@ -383,7 +383,7 @@ $(document).ready(function() {
         }
     }
 
-// New function to render table with pagination
+//  function to render table with pagination
     function renderTableWithPagination() {
         if (allCrops.length === 0) {
             $cropTableBody.html(`

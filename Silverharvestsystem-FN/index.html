@@ -606,7 +606,45 @@
         .cart-icon-target i {
             font-size: 20px;
         }
+        .search-container {
+            position: relative;
+        }
 
+        .search-results {
+            border: 1px solid #e0e0e0;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .search-result-desc {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .highlight {
+            background-color: rgba(136, 180, 78, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
         /* Cart Badge Styling */
         #cartBadge {
             position: absolute;
@@ -905,14 +943,53 @@
                     <a href="#contact" class="nav-item nav-link">Contact</a>
                     <a href="Signup.html" class="nav-item nav-link">Sign Up</a>
                 </div>
+
+                <!-- Search Form - Placed in the original position -->
                 <div class="border-start ps-4 d-none d-lg-block">
-                    <button type="button" class="btn btn-sm p-0"><i class="fa fa-search"></i></button>
+                    <div class="search-container position-relative">
+                        <form id="searchForm" class="d-flex">
+                            <input type="text" id="searchInput" class="form-control form-control-sm rounded-pill"
+                                   placeholder="Search sections..." style="width: 200px; padding-right: 35px;">
+                            <button type="submit" class="btn btn-sm p-0 position-absolute"
+                                    style="right: 10px; top: 50%; transform: translateY(-50%); border: none; background: none;">
+                                <i class="fa fa-search text-muted"></i>
+                            </button>
+                        </form>
+                        <div id="searchResults" class="search-results position-absolute bg-white rounded shadow mt-1"
+                             style="width: 250px; display: none; z-index: 1000; max-height: 300px; overflow-y: auto; right: 0;">
+                            <!-- Search results will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Search Button -->
+                <div class="border-start ps-4 d-lg-none">
+                    <button type="button" class="btn btn-sm p-0" data-bs-toggle="collapse" data-bs-target="#mobileSearch">
+                        <i class="fa fa-search"></i>
+                    </button>
                 </div>
             </div>
         </nav>
+
+        <!-- Mobile Search Form -->
+        <div class="collapse d-lg-none" id="mobileSearch">
+            <div class="search-container position-relative py-3">
+                <form id="mobileSearchForm" class="d-flex">
+                    <input type="text" id="mobileSearchInput" class="form-control rounded-pill"
+                           placeholder="Search sections..." style="padding-right: 40px;">
+                    <button type="submit" class="btn btn-sm p-0 position-absolute"
+                            style="right: 15px; top: 50%; transform: translateY(-50%); border: none; background: none;">
+                        <i class="fa fa-search text-muted"></i>
+                    </button>
+                </form>
+                <div id="mobileSearchResults" class="search-results position-absolute bg-white rounded shadow mt-1"
+                     style="width: 100%; display: none; z-index: 1000; max-height: 200px; overflow-y: auto;">
+                    <!-- Mobile search results will appear here -->
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 <!-- Navbar End -->
 
 
@@ -1604,7 +1681,7 @@
 <!-- Bootstrap Bundle with Popper (needed for navbar collapse) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- jQuery (needed for your Owl Carousel + custom JS) -->
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <!-- Other JS Libraries -->
@@ -1614,10 +1691,9 @@
 <!-- Your Custom JS -->
 <script src="js/main.js"></script>
 
-<!-- Add this right before the closing </head> tag -->
+<!-- Add Script-->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
-
     (function() {
         emailjs.init("tJ7DDVkySO9Pv9dZQ");
     })();
@@ -1663,6 +1739,119 @@
                     console.error('EmailJS error:', error);
                 });
         });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Define sections to search
+        const sections = [
+            { id: 'home', title: 'Home', desc: 'Welcome to Silver Harvest - Smart Plantation Monitoring System' },
+            { id: 'about', title: 'About', desc: 'Smart Plantation Monitoring for Sustainable Growth' },
+            { id: 'features', title: 'Features', desc: 'Smart Plantation Monitoring for the Future of Farming' },
+            { id: 'testimonials', title: 'Testimonials', desc: 'What Our Users Say About Silver Harvest' },
+            { id: 'contact', title: 'Contact', desc: 'Lets Grow Together - Get In Touch' }
+        ];
+
+        // Search functions
+        function performSearch(query, resultsContainer) {
+            if (query.length < 2) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            const filteredSections = sections.filter(section =>
+                section.title.toLowerCase().includes(query.toLowerCase()) ||
+                section.desc.toLowerCase().includes(query.toLowerCase())
+            );
+
+            displayResults(filteredSections, query, resultsContainer);
+        }
+
+        function displayResults(results, query, container) {
+            if (results.length === 0) {
+                container.innerHTML = '<div class="search-result-item p-3 text-center text-muted">No sections found</div>';
+                container.style.display = 'block';
+                return;
+            }
+
+            container.innerHTML = results.map(section => `
+            <div class="search-result-item" onclick="navigateToSection('${section.id}')">
+                <div class="search-result-title">${highlightText(section.title, query)}</div>
+                <div class="search-result-desc">${highlightText(section.desc, query)}</div>
+            </div>
+        `).join('');
+
+            container.style.display = 'block';
+        }
+
+        function highlightText(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function navigateToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                // Close search results
+                document.querySelectorAll('.search-results').forEach(el => {
+                    el.style.display = 'none';
+                });
+                // Clear search inputs
+                document.getElementById('searchInput').value = '';
+                document.getElementById('mobileSearchInput').value = '';
+                // Close mobile search if open
+                const mobileSearch = document.getElementById('mobileSearch');
+                if (mobileSearch.classList.contains('show')) {
+                    new bootstrap.Collapse(mobileSearch).hide();
+                }
+            }
+        }
+
+        // Event listeners for desktop search
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        const searchResults = document.getElementById('searchResults');
+
+        searchInput.addEventListener('input', function() {
+            performSearch(this.value, searchResults);
+        });
+
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (searchInput.value.trim()) {
+                performSearch(searchInput.value.trim(), searchResults);
+            }
+        });
+
+        // Event listeners for mobile search
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        const mobileSearchForm = document.getElementById('mobileSearchForm');
+        const mobileSearchResults = document.getElementById('mobileSearchResults');
+
+        mobileSearchInput.addEventListener('input', function() {
+            performSearch(this.value, mobileSearchResults);
+        });
+
+        mobileSearchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (mobileSearchInput.value.trim()) {
+                performSearch(mobileSearchInput.value.trim(), mobileSearchResults);
+            }
+        });
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                searchResults.style.display = 'none';
+                mobileSearchResults.style.display = 'none';
+            }
+        });
+
+        // Make navigateToSection function globally available
+        window.navigateToSection = navigateToSection;
     });
 </script>
 </body>
